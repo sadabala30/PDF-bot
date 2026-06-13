@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-st.set_page_config(page_title="PDF BOT", page_icon="⬡", layout="wide")
+st.set_page_config(page_title="PDF BOT", page_icon="⬡", layout="wide", initial_sidebar_state="expanded")
 
 # ── FOCUS-RING KILLER ─────────────────────────────────────────────────────────
 FOCUS_KILL = """
@@ -66,6 +66,39 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
   background: #020208 !important;
   color: #c8e0f0 !important;
   font-family: 'Inter', sans-serif !important;
+}
+
+/* ── SIDEBAR TOGGLE ARROW — super visible */
+[data-testid="collapsedControl"] {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 9999 !important;
+  width: 28px !important;
+  height: 72px !important;
+  background: rgba(0,200,255,0.18) !important;
+  border: 1.5px solid rgba(0,200,255,0.7) !important;
+  border-left: none !important;
+  border-radius: 0 12px 12px 0 !important;
+  box-shadow: 0 0 24px rgba(0,200,255,0.5), 4px 0 20px rgba(0,200,255,0.3) !important;
+  animation: sidebarPulse 2s ease-in-out infinite !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+[data-testid="collapsedControl"] svg {
+  color: #00dcff !important;
+  width: 18px !important;
+  height: 18px !important;
+  filter: drop-shadow(0 0 6px rgba(0,200,255,0.9)) !important;
+}
+@keyframes sidebarPulse {
+  0%,100% { box-shadow: 0 0 16px rgba(0,200,255,0.4), 4px 0 14px rgba(0,200,255,0.2); background: rgba(0,200,255,0.14); }
+  50%      { box-shadow: 0 0 32px rgba(0,200,255,0.8), 4px 0 28px rgba(0,200,255,0.5); background: rgba(0,200,255,0.28); }
 }
 
 /* ── SIDEBAR ── */
