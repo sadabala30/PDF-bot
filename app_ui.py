@@ -49,12 +49,16 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#002a40,#005580)!important;border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#1a0050,#4400cc)!important;border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;}
 
-[data-testid="stChatInput"]{background:rgba(0,2,15,0.96)!important;border-top:1px solid rgba(0,200,255,0.14)!important;padding:12px 20px!important;}
-[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.28)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;}
-[data-testid="stChatInput"] textarea:focus{border-color:rgba(0,210,255,0.85)!important;box-shadow:0 0 0 2px rgba(0,200,255,0.2),0 0 30px rgba(0,200,255,0.25)!important;}
+[data-testid="stChatInput"]{background:rgba(0,2,15,0.96)!important;border-top:1px solid rgba(0,200,255,0.14)!important;border:none!important;outline:none!important;box-shadow:none!important;padding:12px 20px!important;}
+[data-testid="stChatInput"]>div{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
+[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.28)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;box-shadow:none!important;}
+[data-testid="stChatInput"] textarea:focus{border-color:rgba(0,210,255,0.85)!important;box-shadow:0 0 0 2px rgba(0,200,255,0.2),0 0 30px rgba(0,200,255,0.25)!important;outline:none!important;}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
 [data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
 [data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.32)!important;box-shadow:0 0 20px rgba(0,200,255,0.45)!important;}
+/* kill any red/default focus ring on the outer wrapper */
+[data-testid="stChatInput"] *:focus{outline:none!important;box-shadow:none!important;}
+[data-testid="stChatInput"] [data-baseweb="textarea"]{border:none!important;background:transparent!important;}
 
 ::-webkit-scrollbar{width:3px;height:3px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -437,12 +441,27 @@ def retrieval_html(chunk_indices):
 CHAT_BANNER_HTML = """
 <div class="sug-bar">
   <div class="sug-prefix">TRY →</div>
-  <div class="sug-tag">summarize this</div>
-  <div class="sug-tag">show 1st image</div>
-  <div class="sug-tag">chapter 3?</div>
-  <div class="sug-tag">show all figures</div>
-  <div class="sug-tag">key findings?</div>
+  <div class="sug-tag" onclick="injectText('summarize this')">summarize this</div>
+  <div class="sug-tag" onclick="injectText('show 1st image')">show 1st image</div>
+  <div class="sug-tag" onclick="injectText('chapter 3?')">chapter 3?</div>
+  <div class="sug-tag" onclick="injectText('show all figures')">show all figures</div>
+  <div class="sug-tag" onclick="injectText('key findings?')">key findings?</div>
 </div>
+<script>
+function injectText(text) {
+  // walk up into the parent frame to find the streamlit textarea
+  var ta = window.parent.document.querySelector('[data-testid="stChatInput"] textarea');
+  if (!ta) ta = window.parent.document.querySelector('textarea');
+  if (!ta) return;
+  // set value via React's internal setter so Streamlit picks it up
+  var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.parent.HTMLTextAreaElement.prototype, 'value').set;
+  nativeInputValueSetter.call(ta, text);
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+  ta.focus();
+  // move cursor to end
+  ta.setSelectionRange(text.length, text.length);
+}
+</script>
 """
 
 # ── MODELS ────────────────────────────────────────────────────────────────────
