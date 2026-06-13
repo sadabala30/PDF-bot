@@ -4,7 +4,6 @@
 
 ### What is an API key?
 - Proves you're allowed to access Claude programmatically
-- Looks like: `sk-ant-api03-xxxxxxxx`
 - Never share it, never push to GitHub
 
 ---
