@@ -36,40 +36,49 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
   font-family: 'Inter', sans-serif !important;
 }
 
-/* ── MAKE SIDEBAR TOGGLE SUPER VISIBLE ── */
+/* ── SIDEBAR TOGGLE — keep visible ── */
 [data-testid="collapsedControl"] {
   display: flex !important;
   visibility: visible !important;
   opacity: 1 !important;
-  width: 32px !important;
-  height: 80px !important;
-  background: rgba(0,200,255,0.2) !important;
-  border: 2px solid #00dcff !important;
-  border-left: none !important;
-  border-radius: 0 14px 14px 0 !important;
-  box-shadow: 0 0 30px rgba(0,200,255,0.6) !important;
-  align-items: center !important;
-  justify-content: center !important;
-  animation: sbpulse 1.8s ease-in-out infinite !important;
+  background: rgba(0,200,255,0.12) !important;
+  border: 1px solid rgba(0,200,255,0.4) !important;
+  border-radius: 0 8px 8px 0 !important;
+  box-shadow: 0 0 14px rgba(0,200,255,0.35) !important;
 }
 [data-testid="collapsedControl"] svg {
   color: #00dcff !important;
-  width: 20px !important;
-  height: 20px !important;
-  filter: drop-shadow(0 0 8px #00dcff) !important;
-}
-@keyframes sbpulse {
-  0%,100% { box-shadow: 0 0 16px rgba(0,200,255,0.4); background: rgba(0,200,255,0.15); }
-  50%      { box-shadow: 0 0 40px rgba(0,200,255,0.9), 0 0 60px rgba(0,200,255,0.4); background: rgba(0,200,255,0.32); }
+  filter: drop-shadow(0 0 4px #00dcff) !important;
 }
 
-/* ── SIDEBAR ── */
-[data-testid="stSidebar"] {
+/* ── SIDEBAR — FORCE VISIBLE ── */
+[data-testid="stSidebar"],
+[data-testid="stSidebar"][aria-expanded="true"],
+[data-testid="stSidebar"][aria-expanded="false"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+  left: 0 !important;
+  width: 18rem !important;
+  min-width: 18rem !important;
+  max-width: 18rem !important;
   background: rgba(0,4,18,0.98) !important;
-  border-right: 1px solid rgba(0,200,255,0.15) !important;
-  min-width: 260px !important;
+  border-right: 1px solid rgba(0,200,255,0.18) !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  overflow-y: auto !important;
+  height: 100vh !important;
 }
-[data-testid="stSidebar"] > div { padding-top: 0 !important; }
+[data-testid="stSidebar"] > div {
+  padding-top: 0 !important;
+  overflow-y: auto !important;
+}
+/* Force the main layout to be a side-by-side flex */
+[data-testid="stAppViewContainer"] > section {
+  display: flex !important;
+  flex-direction: row !important;
+}
 
 /* ── FILE UPLOADER ── */
 [data-testid="stFileUploader"] {
@@ -116,6 +125,18 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
 .stSpinner > div { border-top-color: #00dcff !important; }
 
 .block-container { padding: 0 !important; max-width: 100% !important; }
+
+/* ── MAIN CONTENT AREA — must not overlap sidebar ── */
+[data-testid="stMain"] {
+  flex: 1 !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+}
+section[data-testid="stSidebar"] ~ [data-testid="stMain"],
+.main .block-container { padding: 0 !important; }
+
+/* ── IFRAME (hero canvas) — full width of main only ── */
+iframe { width: 100% !important; }
 
 /* ── CHAT MESSAGES ── */
 [data-testid="stChatMessage"] {
