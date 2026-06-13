@@ -1,13 +1,14 @@
 import streamlit as st
 import anthropic
-from dotenv import load_dotenv
-import os
-load_dotenv()
 from sentence_transformers import SentenceTransformer
-import chromadb
 import fitz
 import tempfile
 import os
+import numpy as np
+import faiss
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # page config
 st.set_page_config(page_title="PDF Bot", page_icon="📄")
@@ -54,36 +55,26 @@ with st.sidebar:
                 doc.close()
                 os.unlink(tmp_path)
                 
-                # chunk and embed
+                # chunk
                 chunks = extract_chunks(full_text)
                 
-                chroma_client = chromadb.Client()
+                # embed all chunks
+                embeddings = model.encode(chunks)
+                embeddings = np.array(embeddings).astype('float32')
                 
-                # reset collection
-                try:
-                    chroma_client.delete_collection("pdf_chunks")
-                except:
-                    pass
+                # build faiss index
+                index = faiss.IndexFlatL2(embeddings.shape[1])
+                index.add(embeddings)
                 
-                collection = chroma_client.create_collection("pdf_chunks")
-                
-                for i, chunk in enumerate(chunks):
-                    embedding = model.encode(chunk).tolist()
-                    collection.add(
-                        documents=[chunk],
-                        embeddings=[embedding],
-                        ids=[f"chunk_{i}"]
-                    )
-                
-                st.session_state.collection = collection
+                st.session_state.index = index
+                st.session_state.chunks = chunks
                 st.session_state.messages = []
                 st.success(f"Done! {len(chunks)} chunks indexed.")
 
 # main chat
-if "collection" not in st.session_state:
+if "index" not in st.session_state:
     st.info("Upload a PDF from the sidebar to get started.")
 else:
-    # display chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
     
@@ -97,20 +88,20 @@ else:
         with st.chat_message("user"):
             st.write(question)
         
-        # retrieve chunks
-        question_embedding = model.encode(question).tolist()
-        results = st.session_state.collection.query(
-            query_embeddings=[question_embedding],
-            n_results=3
-        )
-        context = "\n\n".join(results['documents'][0])
+        # embed question and search
+        question_embedding = np.array(
+            [model.encode(question)]
+        ).astype('float32')
+        
+        _, indices = st.session_state.index.search(question_embedding, 3)
+        relevant_chunks = [st.session_state.chunks[i] for i in indices[0]]
+        context = "\n\n".join(relevant_chunks)
         
         st.session_state.messages.append({
             "role": "user",
             "content": f"Context:\n{context}\n\nQuestion: {question}"
         })
         
-        # get response
         with st.spinner("Thinking..."):
             response = anthropic_client.messages.create(
                 model="claude-haiku-4-5-20251001",

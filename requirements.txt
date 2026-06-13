@@ -1,8 +1,7 @@
 anthropic
 streamlit
 sentence-transformers
-chromadb==0.4.24
+faiss-cpu
 pymupdf
 python-dotenv
-torch
-torchvision
+numpy
