@@ -257,3 +257,15 @@ The chunks talk about objective functions, regularization, neural network weight
 That's the power of embeddings over simple word search.
 
 
+How image reading will work:PDF page has an image
+        ↓
+Extract image from page using pymupdf
+        ↓
+Send image to Claude Vision API
+        ↓
+Claude describes what's in the image
+        ↓
+That description becomes a searchable chunk
+        ↓
+User asks "what does figure 3 show?" 
+→ finds that chunk → Claude answers

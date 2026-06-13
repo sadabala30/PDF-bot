@@ -4,6 +4,7 @@ from sentence_transformers import SentenceTransformer
 import fitz
 import tempfile
 import os
+import base64
 import numpy as np
 import faiss
 from dotenv import load_dotenv
@@ -48,10 +49,51 @@ with st.sidebar:
                     tmp.write(uploaded_file.read())
                     tmp_path = tmp.name
                 
-                doc = fitz.open(tmp_path)
+doc = fitz.open(tmp_path)
                 full_text = ""
-                for page in doc:
+                
+                for page_num, page in enumerate(doc):
+                    # extract text
                     full_text += page.get_text()
+                    
+                    # extract images
+                    image_list = page.get_images()
+                    for img in image_list:
+                        try:
+                            xref = img[0]
+                            base_image = doc.extract_image(xref)
+                            image_bytes = base_image["image"]
+                            image_b64 = base64.b64encode(image_bytes).decode()
+                            media_type = "image/png" if base_image["ext"] == "png" else "image/jpeg"
+                            
+                            vision_response = anthropic_client.messages.create(
+                                model="claude-haiku-4-5-20251001",
+                                max_tokens=300,
+                                messages=[{
+                                    "role": "user",
+                                    "content": [
+                                        {
+                                            "type": "image",
+                                            "source": {
+                                                "type": "base64",
+                                                "media_type": media_type,
+                                                "data": image_b64
+                                            }
+                                        },
+                                        {
+                                            "type": "text",
+                                            "text": "Describe this image in detail. If it's a diagram, chart, or graph, explain what it shows."
+                                        }
+                                    ]
+                                }]
+                            )
+                            
+                            image_description = f"[Image on page {page_num + 1}]: {vision_response.content[0].text}"
+                            full_text += "\n" + image_description + "\n"
+                            
+                        except Exception:
+                            continue
+                
                 doc.close()
                 os.unlink(tmp_path)
                 
