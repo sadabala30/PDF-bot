@@ -1,0 +1,8 @@
+anthropic
+streamlit
+sentence-transformers
+chromadb
+pymupdf
+python-dotenv
+torch
+torchvision
