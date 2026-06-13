@@ -538,12 +538,18 @@ with st.sidebar:
                 for i, lbl in enumerate(STEP_LABELS):
                     cls = "ok" if i < step else ("live" if i == step else "dim")
                     ind = "✓" if i < step else ("●" if i == step else "○")
-                    rows += f'<div style="font-family:\'Share Tech Mono\',monospace;font-size:0.6rem;letter-spacing:.06em;display:flex;align-items:center;gap:8px;padding:3px 0;color:{\"rgba(0,255,136,0.75)\" if cls==\"ok\" else (\"rgba(0,200,255,0.9)\" if cls==\"live\" else \"rgba(0,200,255,0.2)\")};"><span>{ind}</span>> {lbl}</div>'
+                    color = "rgba(0,255,136,0.75)" if cls == "ok" else ("rgba(0,200,255,0.9)" if cls == "live" else "rgba(0,200,255,0.2)")
+                    ff = "Share Tech Mono"
+                    rows += f'<div style="font-family:{ff},monospace;font-size:0.6rem;letter-spacing:.06em;display:flex;align-items:center;gap:8px;padding:3px 0;color:{color};"><span>{ind}</span>> {lbl}</div>'
                 counters = ""
                 if pct >= 75:
-                    counters = f"""<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;">
-                      {"".join(f'<div style="text-align:center;"><div style="font-family:Orbitron,monospace;font-size:0.78rem;color:#00dcff;">{v}</div><div style="font-family:Share Tech Mono,monospace;font-size:0.44rem;color:rgba(0,200,255,0.3);margin-top:2px;">{l}</div></div>' for v,l in [(pages,"pages"),(chunks,"chunks"),(imgs,"images"),(vecs,"vectors")])}
-                    </div>"""
+                    items = [(pages,"pages"),(chunks,"chunks"),(imgs,"images"),(vecs,"vectors")]
+                    cards = "".join(
+                        f'<div style="text-align:center;"><div style="font-family:Orbitron,monospace;font-size:0.78rem;color:#00dcff;">{v}</div>'
+                        f'<div style="font-family:Share Tech Mono,monospace;font-size:0.44rem;color:rgba(0,200,255,0.3);margin-top:2px;">{l}</div></div>'
+                        for v, l in items
+                    )
+                    counters = f'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;">{cards}</div>'
                 titles = ["EXTRACTING","ANALYZING IMAGES","CHUNKING","EMBEDDING","BUILDING INDEX","COMPLETE ✓"]
                 title = titles[min(step, len(titles)-1)]
                 proc_ph.markdown(f"""
