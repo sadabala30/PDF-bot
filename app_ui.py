@@ -11,12 +11,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# page config
 st.set_page_config(page_title="PDF Bot", page_icon="📄")
 st.title("📄 PDF Q&A Bot")
 st.caption("Upload any PDF and ask questions about it")
 
-# load models once
 @st.cache_resource
 def load_models():
     model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -25,7 +23,6 @@ def load_models():
 
 model, anthropic_client = load_models()
 
-# chunk text
 def extract_chunks(text, chunk_size=500, overlap=100):
     words = text.split()
     chunks = []
@@ -36,7 +33,6 @@ def extract_chunks(text, chunk_size=500, overlap=100):
         i += chunk_size - overlap
     return chunks
 
-# sidebar — pdf upload
 with st.sidebar:
     st.header("Upload PDF")
     uploaded_file = st.file_uploader("Choose a PDF", type="pdf")
@@ -44,19 +40,16 @@ with st.sidebar:
     if uploaded_file:
         if st.button("Process PDF"):
             with st.spinner("Reading and indexing PDF..."):
-                # read pdf
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                     tmp.write(uploaded_file.read())
                     tmp_path = tmp.name
                 
-doc = fitz.open(tmp_path)
+                doc = fitz.open(tmp_path)
                 full_text = ""
                 
                 for page_num, page in enumerate(doc):
-                    # extract text
                     full_text += page.get_text()
                     
-                    # extract images
                     image_list = page.get_images()
                     for img in image_list:
                         try:
@@ -97,14 +90,10 @@ doc = fitz.open(tmp_path)
                 doc.close()
                 os.unlink(tmp_path)
                 
-                # chunk
                 chunks = extract_chunks(full_text)
-                
-                # embed all chunks
                 embeddings = model.encode(chunks)
                 embeddings = np.array(embeddings).astype('float32')
                 
-                # build faiss index
                 index = faiss.IndexFlatL2(embeddings.shape[1])
                 index.add(embeddings)
                 
@@ -113,7 +102,6 @@ doc = fitz.open(tmp_path)
                 st.session_state.messages = []
                 st.success(f"Done! {len(chunks)} chunks indexed.")
 
-# main chat
 if "index" not in st.session_state:
     st.info("Upload a PDF from the sidebar to get started.")
 else:
@@ -130,11 +118,7 @@ else:
         with st.chat_message("user"):
             st.write(question)
         
-        # embed question and search
-        question_embedding = np.array(
-            [model.encode(question)]
-        ).astype('float32')
-        
+        question_embedding = np.array([model.encode(question)]).astype('float32')
         _, indices = st.session_state.index.search(question_embedding, 3)
         relevant_chunks = [st.session_state.chunks[i] for i in indices[0]]
         context = "\n\n".join(relevant_chunks)
