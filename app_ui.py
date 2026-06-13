@@ -13,7 +13,6 @@ load_dotenv()
 
 st.set_page_config(page_title="PDF BOT", page_icon="⬡", layout="wide")
 
-# ── GLOBAL STYLES ─────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap');
@@ -28,7 +27,6 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
     font-family: 'Inter', sans-serif !important;
 }
 
-/* ── SIDEBAR ── */
 [data-testid="stSidebar"] {
     background: rgba(0,4,18,0.95) !important;
     border-right: 1px solid rgba(0,200,255,0.12) !important;
@@ -36,7 +34,6 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
 }
 [data-testid="stSidebar"] > div { padding-top: 0 !important; }
 
-/* file uploader */
 [data-testid="stFileUploader"] {
     background: rgba(0,200,255,0.03) !important;
     border: 1px solid rgba(0,200,255,0.2) !important;
@@ -47,7 +44,6 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
 [data-testid="stFileUploader"] section { border: none !important; background: transparent !important; }
 [data-testid="stFileUploader"] button { border-color: rgba(0,200,255,0.4) !important; color: #00dcff !important; background: transparent !important; }
 
-/* process button */
 .stButton > button {
     background: transparent !important;
     border: 1px solid rgba(0,200,255,0.4) !important;
@@ -67,21 +63,15 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
     box-shadow: 0 0 20px rgba(0,200,255,0.25) !important;
 }
 
-/* progress */
 .stProgress > div > div { background: #00dcff !important; }
 .stProgress > div { background: rgba(0,200,255,0.1) !important; border-radius: 0 !important; }
 
-/* alerts */
 .stSuccess { background: rgba(0,255,136,0.06) !important; border: 1px solid rgba(0,255,136,0.2) !important; border-radius: 4px !important; color: #00ff88 !important; font-family:'Share Tech Mono',monospace !important; font-size:0.75rem !important; }
 .stInfo    { background: rgba(0,200,255,0.06) !important; border: 1px solid rgba(0,200,255,0.2) !important; border-radius: 4px !important; }
-
-/* spinner */
 .stSpinner > div { border-top-color: #00dcff !important; }
 
-/* ── MAIN ── */
 .block-container { padding: 0 !important; max-width: 100% !important; }
 
-/* ── CHAT MESSAGES ── */
 [data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
@@ -111,7 +101,6 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
     border-radius: 50% !important;
 }
 
-/* ── CHAT INPUT ── */
 [data-testid="stChatInput"] {
     background: rgba(0,2,15,0.9) !important;
     border-top: 1px solid rgba(0,200,255,0.12) !important;
@@ -137,35 +126,28 @@ html, body, .stApp, [data-testid="stAppViewContainer"] {
     border-radius: 4px !important;
 }
 
-/* scrollbar */
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.3); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0,200,255,0.6); }
 
-/* metric sidebar cards */
 .metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.metric-card {
-    background: rgba(0,200,255,0.04);
-    border: 1px solid rgba(0,200,255,0.12);
-    border-radius:4px; padding:10px 8px; text-align:center;
-}
+.metric-card { background:rgba(0,200,255,0.04); border:1px solid rgba(0,200,255,0.12); border-radius:4px; padding:10px 8px; text-align:center; }
 .metric-val { font-family:'Orbitron',monospace; font-size:0.9rem; font-weight:700; color:#00dcff; }
 .metric-lbl { font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:rgba(0,200,255,0.4); margin-top:2px; letter-spacing:.06em; }
-
 .sys-tips { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:rgba(0,200,255,0.3); line-height:2; letter-spacing:.04em; }
-
 .s-divider { border:none; border-top:1px solid rgba(0,200,255,0.08); margin:6px 0; }
 .s-label { font-family:'Share Tech Mono',monospace; font-size:0.65rem; letter-spacing:.18em; color:rgba(0,200,255,0.35); text-transform:uppercase; margin-bottom:6px; display:block; }
-
 .empty-state { text-align:center; padding:80px 32px; }
 .empty-state .glyph { font-size:3rem; color:rgba(0,200,255,0.15); margin-bottom:20px; display:block; font-family:'Orbitron',monospace; }
 .empty-state h2 { font-family:'Orbitron',monospace; font-size:1rem; font-weight:400; color:rgba(0,200,255,0.25); letter-spacing:.1em; }
 .empty-state p { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:rgba(0,200,255,0.15); margin-top:10px; letter-spacing:.08em; }
+
+.img-result { border:1px solid rgba(0,200,255,0.2); border-radius:6px; overflow:hidden; margin:8px 0; background:rgba(0,200,255,0.03); }
+.img-result-label { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:rgba(0,200,255,0.5); padding:6px 10px; border-bottom:1px solid rgba(0,200,255,0.1); letter-spacing:.08em; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── HERO HTML ─────────────────────────────────────────────────────────────────
 HERO_HTML = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
@@ -173,14 +155,9 @@ HERO_HTML = """
 #hero{position:relative;width:100%;height:260px;background:#020208;overflow:hidden;border-bottom:1px solid rgba(0,200,255,0.12);}
 #matrix-canvas{position:absolute;inset:0;width:100%;height:100%;}
 #particle-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-.grid-bg{position:absolute;inset:0;pointer-events:none;
-  background-image:linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),
-                   linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);
-  background-size:44px 44px;}
-.scanlines{position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);}
-.vignette{position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(2,2,8,0.85) 100%);}
+.grid-bg{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);background-size:44px 44px;}
+.scanlines{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(2,2,8,0.85) 100%);}
 .corner-tl,.corner-tr{position:absolute;top:0;width:40px;height:40px;pointer-events:none;}
 .corner-tl{left:0;border-top:1px solid rgba(0,200,255,0.4);border-left:1px solid rgba(0,200,255,0.4);}
 .corner-tr{right:0;border-top:1px solid rgba(0,200,255,0.4);border-right:1px solid rgba(0,200,255,0.4);}
@@ -192,9 +169,7 @@ HERO_HTML = """
 @keyframes bp{0%,100%{opacity:1;}50%{opacity:.2;}}
 .stat-txt{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,200,255,0.5);letter-spacing:.12em;}
 .hero-content{position:absolute;bottom:24px;left:28px;z-index:10;}
-.hero-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.2em;color:rgba(0,220,255,0.6);
-  border:1px solid rgba(0,220,255,0.25);padding:3px 10px;border-radius:2px;display:inline-block;margin-bottom:12px;
-  position:relative;}
+.hero-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.2em;color:rgba(0,220,255,0.6);border:1px solid rgba(0,220,255,0.25);padding:3px 10px;border-radius:2px;display:inline-block;margin-bottom:12px;position:relative;}
 .hero-tag::before{content:'';position:absolute;left:-1px;top:-1px;width:5px;height:5px;border-top:1px solid #00dcff;border-left:1px solid #00dcff;}
 .hero-tag::after{content:'';position:absolute;right:-1px;bottom:-1px;width:5px;height:5px;border-bottom:1px solid #00dcff;border-right:1px solid #00dcff;}
 .hero-h1{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;line-height:1.05;color:#fff;letter-spacing:-.01em;text-shadow:0 0 50px rgba(0,200,255,0.35);}
@@ -202,15 +177,11 @@ HERO_HTML = """
 @keyframes glow{from{text-shadow:0 0 10px rgba(0,200,255,0.3);}to{text-shadow:0 0 30px rgba(0,200,255,0.8),0 0 60px rgba(0,200,255,0.3);}}
 .hero-sub{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(0,200,255,0.35);letter-spacing:.12em;margin-top:8px;text-transform:uppercase;}
 </style>
-
 <div id="hero">
   <canvas id="matrix-canvas"></canvas>
   <canvas id="particle-canvas"></canvas>
-  <div class="grid-bg"></div>
-  <div class="scanlines"></div>
-  <div class="vignette"></div>
-  <div class="corner-tl"></div><div class="corner-tr"></div>
-  <div class="corner-bl"></div><div class="corner-br"></div>
+  <div class="grid-bg"></div><div class="scanlines"></div><div class="vignette"></div>
+  <div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>
   <div class="status">
     <div class="dot-live"></div>
     <span class="stat-txt">SYSTEM ONLINE</span>
@@ -222,87 +193,25 @@ HERO_HTML = """
     <div class="hero-sub">// claude ai · faiss vector search · sentence transformers</div>
   </div>
 </div>
-
 <script>
 (function(){
-  function tick(){
-    var n=new Date(),e=document.getElementById('hclock');
-    if(e)e.textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(function(x){return String(x).padStart(2,'0');}).join(':');
-  }
+  function tick(){var n=new Date(),e=document.getElementById('hclock');if(e)e.textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(function(x){return String(x).padStart(2,'0');}).join(':');}
   setInterval(tick,1000);tick();
-
-  var mc=document.getElementById('matrix-canvas');
-  var mctx=mc.getContext('2d');
-  var hero=document.getElementById('hero');
-  var W,H,cols=[];
-  var chars='01アイウエオカキクサシスタチツテトナニネノハヒフヘホ';
-  var FS=13;
-
-  function resizeM(){
-    W=mc.width=hero.offsetWidth;
-    H=mc.height=hero.offsetHeight;
-    cols=[];
-    var n=Math.floor(W/FS);
-    for(var i=0;i<n;i++)cols.push({y:Math.random()*H,speed:Math.random()*1.4+0.3,bright:Math.random()>.82,trail:Math.floor(Math.random()*8)+4});
-  }
-
-  function drawMatrix(){
-    mctx.fillStyle='rgba(2,2,8,0.16)';
-    mctx.fillRect(0,0,W,H);
-    mctx.font=FS+'px monospace';
-    cols.forEach(function(c,i){
-      var ch=chars[Math.floor(Math.random()*chars.length)];
-      if(c.bright){mctx.fillStyle='rgba(200,240,255,0.95)';}
-      else{mctx.fillStyle='rgba(0,180,255,0.15)';}
-      mctx.fillText(ch,i*FS,c.y);
-      c.y+=c.speed;
-      if(c.y>H+FS){c.y=-FS*c.trail;c.bright=Math.random()>.82;}
-    });
-  }
-
-  var pc=document.getElementById('particle-canvas');
-  var pctx=pc.getContext('2d');
-  var PW,PH,particles=[];
-
+  var mc=document.getElementById('matrix-canvas'),mctx=mc.getContext('2d'),hero=document.getElementById('hero');
+  var W,H,cols=[],chars='01アイウエオカキクサシスタチツテトナニネノハヒフヘホ',FS=13;
+  function resizeM(){W=mc.width=hero.offsetWidth;H=mc.height=hero.offsetHeight;cols=[];var n=Math.floor(W/FS);for(var i=0;i<n;i++)cols.push({y:Math.random()*H,speed:Math.random()*1.4+0.3,bright:Math.random()>.82,trail:Math.floor(Math.random()*8)+4});}
+  function drawMatrix(){mctx.fillStyle='rgba(2,2,8,0.16)';mctx.fillRect(0,0,W,H);mctx.font=FS+'px monospace';cols.forEach(function(c,i){var ch=chars[Math.floor(Math.random()*chars.length)];mctx.fillStyle=c.bright?'rgba(200,240,255,0.95)':'rgba(0,180,255,0.15)';mctx.fillText(ch,i*FS,c.y);c.y+=c.speed;if(c.y>H+FS){c.y=-FS*c.trail;c.bright=Math.random()>.82;}});}
+  var pc=document.getElementById('particle-canvas'),pctx=pc.getContext('2d'),PW,PH,particles=[];
   function resizeP(){PW=pc.width=hero.offsetWidth;PH=pc.height=hero.offsetHeight;}
-
-  function initParticles(){
-    particles=[];
-    for(var i=0;i<55;i++)particles.push({
-      x:Math.random()*PW,y:Math.random()*PH,
-      vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,
-      r:Math.random()*1.8+.4,a:Math.random()*.5+.15
-    });
-  }
-
-  function drawParticles(){
-    pctx.clearRect(0,0,PW,PH);
-    particles.forEach(function(p){
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0)p.x=PW;if(p.x>PW)p.x=0;
-      if(p.y<0)p.y=PH;if(p.y>PH)p.y=0;
-      pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      pctx.fillStyle='rgba(0,220,255,'+p.a+')';pctx.fill();
-    });
-    for(var i=0;i<particles.length;i++){
-      for(var j=i+1;j<particles.length;j++){
-        var d=Math.hypot(particles[i].x-particles[j].x,particles[i].y-particles[j].y);
-        if(d<90){
-          pctx.beginPath();pctx.moveTo(particles[i].x,particles[i].y);pctx.lineTo(particles[j].x,particles[j].y);
-          pctx.strokeStyle='rgba(0,180,255,'+(0.12*(1-d/90))+')';pctx.lineWidth=0.5;pctx.stroke();
-        }
-      }
-    }
-  }
-
-  function loop(){drawMatrix();drawParticles();requestAnimationFrame(loop);}
-  resizeM();resizeP();initParticles();loop();
-  window.addEventListener('resize',function(){resizeM();resizeP();initParticles();});
+  function initP(){particles=[];for(var i=0;i<55;i++)particles.push({x:Math.random()*PW,y:Math.random()*PH,vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,r:Math.random()*1.8+.4,a:Math.random()*.5+.15});}
+  function drawP(){pctx.clearRect(0,0,PW,PH);particles.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=PW;if(p.x>PW)p.x=0;if(p.y<0)p.y=PH;if(p.y>PH)p.y=0;pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);pctx.fillStyle='rgba(0,220,255,'+p.a+')';pctx.fill();});for(var i=0;i<particles.length;i++){for(var j=i+1;j<particles.length;j++){var d=Math.hypot(particles[i].x-particles[j].x,particles[i].y-particles[j].y);if(d<90){pctx.beginPath();pctx.moveTo(particles[i].x,particles[i].y);pctx.lineTo(particles[j].x,particles[j].y);pctx.strokeStyle='rgba(0,180,255,'+(0.12*(1-d/90))+')';pctx.lineWidth=0.5;pctx.stroke();}}}}
+  function loop(){drawMatrix();drawP();requestAnimationFrame(loop);}
+  resizeM();resizeP();initP();loop();
+  window.addEventListener('resize',function(){resizeM();resizeP();initP();});
 })();
 </script>
 """
 
-# ── MODELS ────────────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_models():
     m = SentenceTransformer('all-MiniLM-L6-v2')
@@ -318,6 +227,49 @@ def extract_chunks(text, chunk_size=500, overlap=100):
         chunks.append(" ".join(words[i:i+chunk_size]))
         i += chunk_size - overlap
     return chunks
+
+def is_image_request(question):
+    """Detect if user is asking to see/show an image"""
+    q = question.lower()
+    triggers = ["show", "display", "see", "view", "image", "figure", "picture", "photo", "diagram", "chart", "graph", "illustration", "img"]
+    return any(t in q for t in triggers)
+
+def find_matching_images(question, image_store):
+    """Return images whose page/index match what the user asked about"""
+    if not image_store:
+        return []
+    q = question.lower()
+    matched = []
+
+    # parse "1st", "2nd", "first", "second", "3", etc.
+    ordinals = {"1st":0,"first":0,"2nd":1,"second":1,"3rd":2,"third":2,"4th":3,"fourth":3,"5th":4,"fifth":4}
+    for word, idx in ordinals.items():
+        if word in q and idx < len(image_store):
+            matched.append(image_store[idx])
+            return matched
+
+    # parse bare numbers "image 3", "figure 2"
+    import re
+    nums = re.findall(r'\b(\d+)\b', q)
+    for n in nums:
+        n = int(n) - 1  # convert to 0-indexed
+        if 0 <= n < len(image_store):
+            matched.append(image_store[n])
+            return matched
+
+    # "last image"
+    if "last" in q:
+        matched.append(image_store[-1])
+        return matched
+
+    # "all images"
+    if "all" in q:
+        return image_store
+
+    # default: return first image if generic "show image"
+    if any(t in q for t in ["image","figure","picture","photo","diagram","chart","graph"]):
+        matched.append(image_store[0])
+    return matched
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -347,6 +299,9 @@ with st.sidebar:
                 full_text = ""
                 prog = st.progress(0)
                 total = len(doc)
+                # Store images as list of dicts: {b64, media_type, page, index, description}
+                image_store = []
+                img_global_idx = 0
 
                 for pnum, page in enumerate(doc):
                     full_text += page.get_text()
@@ -354,57 +309,76 @@ with st.sidebar:
                         try:
                             xref = img[0]
                             bi = doc.extract_image(xref)
-                            b64 = base64.b64encode(bi["image"]).decode()
+                            img_bytes = bi["image"]
+                            b64 = base64.b64encode(img_bytes).decode()
                             mt = "image/png" if bi["ext"] == "png" else "image/jpeg"
+
+                            # get vision description
                             resp = anthropic_client.messages.create(
                                 model="claude-haiku-4-5-20251001", max_tokens=300,
                                 messages=[{"role":"user","content":[
                                     {"type":"image","source":{"type":"base64","media_type":mt,"data":b64}},
-                                    {"type":"text","text":"Describe this image. If it's a diagram or chart, explain what it shows."}
+                                    {"type":"text","text":"Describe this image concisely. If it's a diagram or chart, explain what it shows."}
                                 ]}]
                             )
-                            full_text += f"\n[Image p{pnum+1}]: {resp.content[0].text}\n"
+                            desc = resp.content[0].text
+
+                            # store both description in text AND raw image bytes
+                            image_store.append({
+                                "b64": b64,
+                                "media_type": mt,
+                                "page": pnum + 1,
+                                "index": img_global_idx,
+                                "description": desc
+                            })
+                            img_global_idx += 1
+
+                            full_text += f"\n[Image {img_global_idx} on page {pnum+1}]: {desc}\n"
                         except Exception:
                             continue
                     prog.progress((pnum+1)/total)
 
                 doc.close()
                 os.unlink(tmp_path)
+
                 chunks = extract_chunks(full_text)
                 embs = np.array(model.encode(chunks)).astype('float32')
                 index = faiss.IndexFlatL2(embs.shape[1])
                 index.add(embs)
-                st.session_state.index  = index
-                st.session_state.chunks = chunks
-                st.session_state.messages = []
-                st.session_state.chunk_count = len(chunks)
 
-            st.success(f"✓ {len(chunks)} chunks indexed")
+                st.session_state.index       = index
+                st.session_state.chunks      = chunks
+                st.session_state.messages    = []
+                st.session_state.chat_display = []  # list of {role, content, images}
+                st.session_state.chunk_count = len(chunks)
+                st.session_state.image_store = image_store
+                st.session_state.image_count = len(image_store)
+
+            st.success(f"✓ {len(chunks)} chunks · {len(image_store)} images indexed")
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
-    # metrics
     chunk_count = st.session_state.get("chunk_count", 0)
+    img_count   = st.session_state.get("image_count", 0)
     st.markdown(f"""
     <span class="s-label">// SYSTEM METRICS</span>
     <div class="metric-grid">
       <div class="metric-card"><div class="metric-val">{chunk_count if chunk_count else '—'}</div><div class="metric-lbl">Chunks</div></div>
+      <div class="metric-card"><div class="metric-val">{img_count if img_count else '—'}</div><div class="metric-lbl">Images</div></div>
       <div class="metric-card"><div class="metric-val">384</div><div class="metric-lbl">Embed dim</div></div>
-      <div class="metric-card"><div class="metric-val">L2</div><div class="metric-lbl">FAISS</div></div>
       <div class="metric-card"><div class="metric-val">TOP 3</div><div class="metric-lbl">Retrieval</div></div>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
-
     st.markdown("""
     <span class="s-label">// QUERY TIPS</span>
     <div class="sys-tips">
       › ask specific questions<br>
+      › "show me the 1st image"<br>
+      › "show all figures"<br>
       › reference page numbers<br>
-      › request summaries<br>
-      › ask about diagrams<br>
-      › cross-reference sections
+      › request summaries
     </div>
     """, unsafe_allow_html=True)
 
@@ -427,43 +401,90 @@ if "index" not in st.session_state:
     </div>
     """, unsafe_allow_html=True)
 else:
+    if "chat_display" not in st.session_state:
+        st.session_state.chat_display = []
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
-    for msg in st.session_state.messages:
-        display = msg["content"]
-        if msg["role"] == "user" and "Question: " in display:
-            display = display.split("Question: ")[-1]
-        with st.chat_message(msg["role"]):
-            st.write(display)
+    # render chat history
+    for entry in st.session_state.chat_display:
+        with st.chat_message(entry["role"]):
+            st.write(entry["content"])
+            # show images if any
+            if entry.get("images"):
+                for img_data in entry["images"]:
+                    st.markdown(f'<div class="img-result"><div class="img-result-label">// IMAGE {img_data["index"]+1} · PAGE {img_data["page"]}</div></div>', unsafe_allow_html=True)
+                    st.image(
+                        base64.b64decode(img_data["b64"]),
+                        caption=f'Image {img_data["index"]+1} (page {img_data["page"]})',
+                        use_column_width=True
+                    )
 
     question = st.chat_input("// query the document…")
 
     if question:
         with st.chat_message("user"):
             st.write(question)
+        st.session_state.chat_display.append({"role":"user","content":question,"images":[]})
 
-        q_emb = np.array([model.encode(question)]).astype('float32')
-        _, idxs = st.session_state.index.search(q_emb, 3)
-        context = "\n\n".join(st.session_state.chunks[i] for i in idxs[0])
+        images_to_show = []
+        reply = ""
 
-        st.session_state.messages.append({
-            "role": "user",
-            "content": f"Context:\n{context}\n\nQuestion: {question}"
-        })
+        # check if user wants to see image(s)
+        if is_image_request(question):
+            image_store = st.session_state.get("image_store", [])
+            images_to_show = find_matching_images(question, image_store)
 
-        with st.spinner("// processing query…"):
-            response = anthropic_client.messages.create(
-                model="claude-haiku-4-5-20251001",
-                max_tokens=1024,
-                system="You are an intelligent document assistant. Answer questions based on the provided context. If the exact term isn't found, look for related concepts. Only say you cannot find it if there is truly nothing related in the context.",
-                messages=st.session_state.messages
-            )
+        if images_to_show:
+            # still get text context but also surface the images
+            q_emb = np.array([model.encode(question)]).astype('float32')
+            _, idxs = st.session_state.index.search(q_emb, 3)
+            context = "\n\n".join(st.session_state.chunks[i] for i in idxs[0])
 
-        reply = response.content[0].text
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+            st.session_state.messages.append({
+                "role": "user",
+                "content": f"Context:\n{context}\n\nQuestion: {question}\n\nNote: The user wants to see the actual image(s). Briefly describe what they are about to see."
+            })
+
+            with st.spinner("// retrieving…"):
+                response = anthropic_client.messages.create(
+                    model="claude-haiku-4-5-20251001", max_tokens=300,
+                    system="You are a document assistant. The user has asked to see an image from the document. Briefly tell them what image you are showing them (1-2 sentences). Do NOT say you cannot show images.",
+                    messages=st.session_state.messages
+                )
+            reply = response.content[0].text
+
+        else:
+            # normal RAG query
+            q_emb = np.array([model.encode(question)]).astype('float32')
+            _, idxs = st.session_state.index.search(q_emb, 3)
+            context = "\n\n".join(st.session_state.chunks[i] for i in idxs[0])
+
+            st.session_state.messages.append({
+                "role": "user",
+                "content": f"Context:\n{context}\n\nQuestion: {question}"
+            })
+
+            with st.spinner("// processing query…"):
+                response = anthropic_client.messages.create(
+                    model="claude-haiku-4-5-20251001", max_tokens=1024,
+                    system="You are an intelligent document assistant. Answer questions based on the provided context. If the exact term isn't found, look for related concepts. Only say you cannot find it if there is truly nothing related.",
+                    messages=st.session_state.messages
+                )
+            reply = response.content[0].text
+
+        st.session_state.messages.append({"role":"assistant","content":reply})
+        st.session_state.chat_display.append({"role":"assistant","content":reply,"images":images_to_show})
 
         with st.chat_message("assistant"):
             st.write(reply)
+            if images_to_show:
+                for img_data in images_to_show:
+                    st.markdown(f'<div class="img-result"><div class="img-result-label">// IMAGE {img_data["index"]+1} · PAGE {img_data["page"]}</div></div>', unsafe_allow_html=True)
+                    st.image(
+                        base64.b64decode(img_data["b64"]),
+                        caption=f'Image {img_data["index"]+1} (page {img_data["page"]})',
+                        use_column_width=True
+                    )
