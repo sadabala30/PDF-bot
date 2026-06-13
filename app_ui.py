@@ -11,364 +11,303 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-st.set_page_config(page_title="PDF Bot", page_icon="✦", layout="wide")
+st.set_page_config(page_title="PDF BOT", page_icon="⬡", layout="wide")
 
+# ── GLOBAL STYLES ─────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500&display=swap');
 
-* { font-family: 'Space Grotesk', sans-serif; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── KILL ALL STREAMLIT CHROME ── */
-#MainMenu, footer, header { visibility: hidden; }
-.stDeployButton { display: none; }
-[data-testid="stToolbar"] { display: none; }
+#MainMenu, footer, header, [data-testid="stToolbar"], .stDeployButton { display:none !important; visibility:hidden !important; }
 
-/* ── ROOT BG ── */
-.stApp {
-    background: #080810;
-    color: #e8e6f0;
+html, body, .stApp, [data-testid="stAppViewContainer"] {
+    background: #020208 !important;
+    color: #c8e0f0 !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
 /* ── SIDEBAR ── */
 [data-testid="stSidebar"] {
-    background: #09090f !important;
-    border-right: 1px solid rgba(255,255,255,0.06) !important;
+    background: rgba(0,4,18,0.95) !important;
+    border-right: 1px solid rgba(0,200,255,0.12) !important;
+    backdrop-filter: blur(12px) !important;
 }
-[data-testid="stSidebar"] > div:first-child {
-    padding-top: 0 !important;
-}
-
-/* sidebar canvas hero injected via component */
-.sidebar-brand {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.18em;
-    color: rgba(249,83,198,0.6);
-    text-transform: uppercase;
-    padding: 10px 16px 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    margin-bottom: 12px;
-}
+[data-testid="stSidebar"] > div { padding-top: 0 !important; }
 
 /* file uploader */
 [data-testid="stFileUploader"] {
-    background: rgba(249,83,198,0.04) !important;
-    border: 1.5px dashed rgba(249,83,198,0.35) !important;
-    border-radius: 10px !important;
-    padding: 8px !important;
+    background: rgba(0,200,255,0.03) !important;
+    border: 1px solid rgba(0,200,255,0.2) !important;
+    border-radius: 6px !important;
 }
-[data-testid="stFileUploader"]:hover {
-    border-color: rgba(249,83,198,0.7) !important;
-}
-[data-testid="stFileUploader"] label { color: #c0bdd8 !important; font-size: 0.82rem !important; }
+[data-testid="stFileUploader"]:hover { border-color: rgba(0,200,255,0.6) !important; }
+[data-testid="stFileUploader"] label { color: rgba(0,200,255,0.6) !important; font-family:'Share Tech Mono',monospace !important; font-size:0.72rem !important; }
+[data-testid="stFileUploader"] section { border: none !important; background: transparent !important; }
+[data-testid="stFileUploader"] button { border-color: rgba(0,200,255,0.4) !important; color: #00dcff !important; background: transparent !important; }
 
 /* process button */
 .stButton > button {
     background: transparent !important;
-    border: 1px solid rgba(249,83,198,0.5) !important;
-    color: #f953c6 !important;
-    border-radius: 6px !important;
-    font-family: 'Space Mono', monospace !important;
-    font-size: 0.72rem !important;
-    letter-spacing: 0.1em !important;
+    border: 1px solid rgba(0,200,255,0.4) !important;
+    color: #00dcff !important;
+    border-radius: 4px !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.12em !important;
     width: 100% !important;
-    padding: 8px !important;
+    padding: 10px !important;
+    text-transform: uppercase !important;
     transition: all 0.2s !important;
 }
 .stButton > button:hover {
-    background: rgba(249,83,198,0.12) !important;
-    border-color: #f953c6 !important;
+    background: rgba(0,200,255,0.1) !important;
+    border-color: #00dcff !important;
+    box-shadow: 0 0 20px rgba(0,200,255,0.25) !important;
 }
 
-/* progress bar */
-.stProgress > div > div { background: #f953c6 !important; }
+/* progress */
+.stProgress > div > div { background: #00dcff !important; }
+.stProgress > div { background: rgba(0,200,255,0.1) !important; border-radius: 0 !important; }
 
-/* success / info banners */
-.stSuccess {
-    background: rgba(0,255,150,0.06) !important;
-    border: 1px solid rgba(0,255,150,0.2) !important;
-    border-radius: 8px !important;
-    color: #6effc8 !important;
-}
-.stInfo {
-    background: rgba(249,83,198,0.06) !important;
-    border: 1px solid rgba(249,83,198,0.2) !important;
-    border-radius: 8px !important;
-}
+/* alerts */
+.stSuccess { background: rgba(0,255,136,0.06) !important; border: 1px solid rgba(0,255,136,0.2) !important; border-radius: 4px !important; color: #00ff88 !important; font-family:'Share Tech Mono',monospace !important; font-size:0.75rem !important; }
+.stInfo    { background: rgba(0,200,255,0.06) !important; border: 1px solid rgba(0,200,255,0.2) !important; border-radius: 4px !important; }
 
-/* sidebar tips */
-.tip-block {
-    margin-top: 4px;
-    padding: 10px 14px;
-    border-left: 2px solid rgba(249,83,198,0.4);
-    font-size: 0.78rem;
-    color: #7a78a0;
-    line-height: 1.7;
-}
+/* spinner */
+.stSpinner > div { border-top-color: #00dcff !important; }
 
-/* ── MAIN AREA ── */
-.block-container {
-    padding: 0 !important;
-    max-width: 100% !important;
-}
-
-/* ── HERO CANVAS STRIP ── */
-#hero-wrap {
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-}
+/* ── MAIN ── */
+.block-container { padding: 0 !important; max-width: 100% !important; }
 
 /* ── CHAT MESSAGES ── */
 [data-testid="stChatMessage"] {
     background: transparent !important;
     border: none !important;
-    padding: 0 32px !important;
-    margin-bottom: 6px !important;
+    padding: 4px 28px !important;
+    margin-bottom: 4px !important;
 }
-
-/* user bubble */
-[data-testid="stChatMessage"][data-testid*="user"] .stMarkdown,
-.stChatMessage:has([data-testid="chatAvatarIcon-user"]) {
-    background: rgba(249,83,198,0.1) !important;
-}
-
-/* override chat bubble backgrounds */
 [data-testid="stChatMessage"] > div:last-child {
-    background: rgba(255,255,255,0.03) !important;
+    background: rgba(255,255,255,0.02) !important;
     border: 1px solid rgba(255,255,255,0.07) !important;
-    border-radius: 12px !important;
+    border-radius: 6px 6px 6px 2px !important;
     padding: 12px 16px !important;
-    font-size: 0.88rem !important;
+    font-size: 0.85rem !important;
     line-height: 1.65 !important;
-    color: #d0cee8 !important;
+    color: #b8cce0 !important;
+    font-family: 'Inter', sans-serif !important;
 }
-
-/* user msg distinct */
-[data-testid="stChatMessage"]:has([aria-label="user avatar"]) > div:last-child,
-[data-testid="stChatMessage"]:nth-child(odd) > div:last-child {
-    background: rgba(249,83,198,0.08) !important;
-    border-color: rgba(249,83,198,0.2) !important;
-    color: #eee8f8 !important;
+[data-testid="stChatMessage"]:has([aria-label="user avatar"]) > div:last-child {
+    background: rgba(0,200,255,0.08) !important;
+    border-color: rgba(0,200,255,0.2) !important;
+    border-radius: 6px 6px 2px 6px !important;
+    color: #a0d8f0 !important;
 }
-
-/* avatar icons */
-[data-testid="stChatMessage"] img,
-[data-testid="stChatMessage"] [data-testid="chatAvatarIcon-user"],
-[data-testid="stChatMessage"] [data-testid="chatAvatarIcon-assistant"] {
-    background: #1a1828 !important;
-    border: 1px solid rgba(249,83,198,0.3) !important;
+[data-testid="stChatMessage"] [data-testid*="Avatar"],
+[data-testid="stChatMessage"] img {
+    background: rgba(0,200,255,0.1) !important;
+    border: 1px solid rgba(0,200,255,0.3) !important;
     border-radius: 50% !important;
-    color: #f953c6 !important;
 }
 
 /* ── CHAT INPUT ── */
 [data-testid="stChatInput"] {
-    background: #0d0c18 !important;
-    border-top: 1px solid rgba(255,255,255,0.06) !important;
-    padding: 14px 32px !important;
+    background: rgba(0,2,15,0.9) !important;
+    border-top: 1px solid rgba(0,200,255,0.12) !important;
+    padding: 14px 28px !important;
 }
 [data-testid="stChatInput"] textarea {
-    background: rgba(255,255,255,0.04) !important;
-    border: 1px solid rgba(249,83,198,0.3) !important;
-    border-radius: 10px !important;
-    color: #e8e6f0 !important;
-    font-size: 0.88rem !important;
-    font-family: 'Space Grotesk', sans-serif !important;
+    background: rgba(0,200,255,0.04) !important;
+    border: 1px solid rgba(0,200,255,0.2) !important;
+    border-radius: 4px !important;
+    color: #a0d8f0 !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 0.82rem !important;
 }
 [data-testid="stChatInput"] textarea:focus {
-    border-color: rgba(249,83,198,0.7) !important;
-    box-shadow: 0 0 0 2px rgba(249,83,198,0.12) !important;
+    border-color: rgba(0,200,255,0.7) !important;
+    box-shadow: 0 0 16px rgba(0,200,255,0.15) !important;
 }
+[data-testid="stChatInput"] textarea::placeholder { color: rgba(0,200,255,0.25) !important; }
 [data-testid="stChatInput"] button {
-    background: rgba(249,83,198,0.15) !important;
-    border: 1px solid rgba(249,83,198,0.4) !important;
-    border-radius: 8px !important;
-    color: #f953c6 !important;
-}
-
-/* ── EMPTY STATE ── */
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 24px;
-    text-align: center;
-    color: #3d3a58;
-}
-.empty-state .glyph {
-    font-size: 3.5rem;
-    margin-bottom: 20px;
-    opacity: 0.4;
-}
-.empty-state h2 {
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: #5a5878;
-    margin-bottom: 8px;
-}
-.empty-state p {
-    font-size: 0.8rem;
-    color: #38364f;
-    font-family: 'Space Mono', monospace;
-    letter-spacing: 0.05em;
+    background: rgba(0,200,255,0.12) !important;
+    border: 1px solid rgba(0,200,255,0.35) !important;
+    color: #00dcff !important;
+    border-radius: 4px !important;
 }
 
 /* scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(249,83,198,0.25); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(249,83,198,0.5); }
+::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.3); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,200,255,0.6); }
 
-/* spinner */
-.stSpinner > div { border-top-color: #f953c6 !important; }
+/* metric sidebar cards */
+.metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.metric-card {
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.12);
+    border-radius:4px; padding:10px 8px; text-align:center;
+}
+.metric-val { font-family:'Orbitron',monospace; font-size:0.9rem; font-weight:700; color:#00dcff; }
+.metric-lbl { font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:rgba(0,200,255,0.4); margin-top:2px; letter-spacing:.06em; }
 
+.sys-tips { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:rgba(0,200,255,0.3); line-height:2; letter-spacing:.04em; }
+
+.s-divider { border:none; border-top:1px solid rgba(0,200,255,0.08); margin:6px 0; }
+.s-label { font-family:'Share Tech Mono',monospace; font-size:0.65rem; letter-spacing:.18em; color:rgba(0,200,255,0.35); text-transform:uppercase; margin-bottom:6px; display:block; }
+
+.empty-state { text-align:center; padding:80px 32px; }
+.empty-state .glyph { font-size:3rem; color:rgba(0,200,255,0.15); margin-bottom:20px; display:block; font-family:'Orbitron',monospace; }
+.empty-state h2 { font-family:'Orbitron',monospace; font-size:1rem; font-weight:400; color:rgba(0,200,255,0.25); letter-spacing:.1em; }
+.empty-state p { font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:rgba(0,200,255,0.15); margin-top:10px; letter-spacing:.08em; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── HERO CANVAS (injected at top of main area) ──────────────────────────────
+# ── HERO HTML ─────────────────────────────────────────────────────────────────
 HERO_HTML = """
-<div id="hero-wrap" style="width:100%;position:relative;overflow:hidden;height:220px;background:#080810;">
-  <canvas id="hc" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
-  <canvas id="gc" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none;"></canvas>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+#hero{position:relative;width:100%;height:260px;background:#020208;overflow:hidden;border-bottom:1px solid rgba(0,200,255,0.12);}
+#matrix-canvas{position:absolute;inset:0;width:100%;height:100%;}
+#particle-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.grid-bg{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);
+  background-size:44px 44px;}
+.scanlines{position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);}
+.vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(2,2,8,0.85) 100%);}
+.corner-tl,.corner-tr{position:absolute;top:0;width:40px;height:40px;pointer-events:none;}
+.corner-tl{left:0;border-top:1px solid rgba(0,200,255,0.4);border-left:1px solid rgba(0,200,255,0.4);}
+.corner-tr{right:0;border-top:1px solid rgba(0,200,255,0.4);border-right:1px solid rgba(0,200,255,0.4);}
+.corner-bl,.corner-br{position:absolute;bottom:0;width:40px;height:40px;pointer-events:none;}
+.corner-bl{left:0;border-bottom:1px solid rgba(0,200,255,0.4);border-left:1px solid rgba(0,200,255,0.4);}
+.corner-br{right:0;border-bottom:1px solid rgba(0,200,255,0.4);border-right:1px solid rgba(0,200,255,0.4);}
+.status{position:absolute;top:16px;right:20px;display:flex;gap:10px;align-items:center;z-index:10;}
+.dot-live{width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;animation:bp 1.8s infinite;}
+@keyframes bp{0%,100%{opacity:1;}50%{opacity:.2;}}
+.stat-txt{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(0,200,255,0.5);letter-spacing:.12em;}
+.hero-content{position:absolute;bottom:24px;left:28px;z-index:10;}
+.hero-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.2em;color:rgba(0,220,255,0.6);
+  border:1px solid rgba(0,220,255,0.25);padding:3px 10px;border-radius:2px;display:inline-block;margin-bottom:12px;
+  position:relative;}
+.hero-tag::before{content:'';position:absolute;left:-1px;top:-1px;width:5px;height:5px;border-top:1px solid #00dcff;border-left:1px solid #00dcff;}
+.hero-tag::after{content:'';position:absolute;right:-1px;bottom:-1px;width:5px;height:5px;border-bottom:1px solid #00dcff;border-right:1px solid #00dcff;}
+.hero-h1{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;line-height:1.05;color:#fff;letter-spacing:-.01em;text-shadow:0 0 50px rgba(0,200,255,0.35);}
+.hero-h1 span{color:#00dcff;display:inline-block;animation:glow 2.5s ease-in-out infinite alternate;}
+@keyframes glow{from{text-shadow:0 0 10px rgba(0,200,255,0.3);}to{text-shadow:0 0 30px rgba(0,200,255,0.8),0 0 60px rgba(0,200,255,0.3);}}
+.hero-sub{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:rgba(0,200,255,0.35);letter-spacing:.12em;margin-top:8px;text-transform:uppercase;}
+</style>
 
-  <!-- scanlines -->
-  <div style="position:absolute;inset:0;pointer-events:none;z-index:4;
-    background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px);">
+<div id="hero">
+  <canvas id="matrix-canvas"></canvas>
+  <canvas id="particle-canvas"></canvas>
+  <div class="grid-bg"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="corner-tl"></div><div class="corner-tr"></div>
+  <div class="corner-bl"></div><div class="corner-br"></div>
+  <div class="status">
+    <div class="dot-live"></div>
+    <span class="stat-txt">SYSTEM ONLINE</span>
+    <span class="stat-txt" id="hclock">--:--:--</span>
   </div>
-
-  <!-- corner tags -->
-  <div style="position:absolute;top:14px;left:18px;z-index:10;
-    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;
-    color:rgba(249,83,198,.65);text-transform:uppercase;
-    border:1px solid rgba(249,83,198,.25);padding:3px 8px;border-radius:2px;">
-    ✦ PDF BOT
-  </div>
-  <div style="position:absolute;top:14px;right:18px;z-index:10;
-    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.15em;
-    color:rgba(255,255,255,.2);">
-    RAG / v2.0
-  </div>
-
-  <!-- title -->
-  <div style="position:absolute;bottom:22px;left:22px;z-index:10;pointer-events:none;">
-    <div style="font-family:'Space Grotesk',sans-serif;font-size:2.4rem;font-weight:700;
-      letter-spacing:-.03em;color:#fff;line-height:1;mix-blend-mode:difference;">
-      Ask your&nbsp;<span style="color:#f953c6;">PDF</span>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.35);
-      margin-top:6px;letter-spacing:.1em;text-transform:uppercase;">
-      hover to glitch · upload · ask anything
-    </div>
+  <div class="hero-content">
+    <div class="hero-tag">✦ PDF INTELLIGENCE · RAG v2.0</div>
+    <div class="hero-h1">QUERY YOUR<br><span>DOCUMENT</span></div>
+    <div class="hero-sub">// claude ai · faiss vector search · sentence transformers</div>
   </div>
 </div>
 
 <script>
 (function(){
-  const wrap = document.getElementById('hero-wrap');
-  const hc   = document.getElementById('hc');
-  const gc   = document.getElementById('gc');
-  const ctx  = hc.getContext('2d');
-  const gctx = gc.getContext('2d');
-  let W,H,sy=0,glitching=false,gtimer=null;
+  function tick(){
+    var n=new Date(),e=document.getElementById('hclock');
+    if(e)e.textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(function(x){return String(x).padStart(2,'0');}).join(':');
+  }
+  setInterval(tick,1000);tick();
 
-  function resize(){
-    W=wrap.offsetWidth; H=wrap.offsetHeight;
-    hc.width=W; hc.height=H; gc.width=W; gc.height=H;
+  var mc=document.getElementById('matrix-canvas');
+  var mctx=mc.getContext('2d');
+  var hero=document.getElementById('hero');
+  var W,H,cols=[];
+  var chars='01アイウエオカキクサシスタチツテトナニネノハヒフヘホ';
+  var FS=13;
+
+  function resizeM(){
+    W=mc.width=hero.offsetWidth;
+    H=mc.height=hero.offsetHeight;
+    cols=[];
+    var n=Math.floor(W/FS);
+    for(var i=0;i<n;i++)cols.push({y:Math.random()*H,speed:Math.random()*1.4+0.3,bright:Math.random()>.82,trail:Math.floor(Math.random()*8)+4});
   }
 
-  /* procedural noise texture */
-  function makeTex(){
-    const s=256,o=document.createElement('canvas');
-    o.width=s;o.height=s;
-    const ox=o.getContext('2d'),id=ox.createImageData(s,s),d=id.data;
-    for(let i=0;i<s*s;i++){
-      const v=Math.random();
-      const r=v>.97?249:v>.93?120:Math.floor(v*22+3);
-      const g=v>.97?83 :v>.93?20 :Math.floor(v*10+1);
-      const b=v>.97?198:v>.93?80 :Math.floor(v*40+8);
-      d[i*4]=r;d[i*4+1]=g;d[i*4+2]=b;d[i*4+3]=255;
+  function drawMatrix(){
+    mctx.fillStyle='rgba(2,2,8,0.16)';
+    mctx.fillRect(0,0,W,H);
+    mctx.font=FS+'px monospace';
+    cols.forEach(function(c,i){
+      var ch=chars[Math.floor(Math.random()*chars.length)];
+      if(c.bright){mctx.fillStyle='rgba(200,240,255,0.95)';}
+      else{mctx.fillStyle='rgba(0,180,255,0.15)';}
+      mctx.fillText(ch,i*FS,c.y);
+      c.y+=c.speed;
+      if(c.y>H+FS){c.y=-FS*c.trail;c.bright=Math.random()>.82;}
+    });
+  }
+
+  var pc=document.getElementById('particle-canvas');
+  var pctx=pc.getContext('2d');
+  var PW,PH,particles=[];
+
+  function resizeP(){PW=pc.width=hero.offsetWidth;PH=pc.height=hero.offsetHeight;}
+
+  function initParticles(){
+    particles=[];
+    for(var i=0;i<55;i++)particles.push({
+      x:Math.random()*PW,y:Math.random()*PH,
+      vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,
+      r:Math.random()*1.8+.4,a:Math.random()*.5+.15
+    });
+  }
+
+  function drawParticles(){
+    pctx.clearRect(0,0,PW,PH);
+    particles.forEach(function(p){
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=PW;if(p.x>PW)p.x=0;
+      if(p.y<0)p.y=PH;if(p.y>PH)p.y=0;
+      pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      pctx.fillStyle='rgba(0,220,255,'+p.a+')';pctx.fill();
+    });
+    for(var i=0;i<particles.length;i++){
+      for(var j=i+1;j<particles.length;j++){
+        var d=Math.hypot(particles[i].x-particles[j].x,particles[i].y-particles[j].y);
+        if(d<90){
+          pctx.beginPath();pctx.moveTo(particles[i].x,particles[i].y);pctx.lineTo(particles[j].x,particles[j].y);
+          pctx.strokeStyle='rgba(0,180,255,'+(0.12*(1-d/90))+')';pctx.lineWidth=0.5;pctx.stroke();
+        }
+      }
     }
-    ox.putImageData(id,0,0);return o;
-  }
-  const tex=makeTex();
-  let pat;
-  function buildPat(){ pat=ctx.createPattern(tex,'repeat'); }
-
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    ctx.fillStyle='#080810';ctx.fillRect(0,0,W,H);
-    ctx.save();
-    ctx.translate(0,-(sy%tex.height));
-    ctx.fillStyle=pat;ctx.globalAlpha=.5;
-    ctx.fillRect(0,0,W,H+tex.height);
-    ctx.restore();
-    /* vignette */
-    const vg=ctx.createRadialGradient(W/2,H/2,H*.05,W/2,H/2,H*.9);
-    vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.82)');
-    ctx.fillStyle=vg;ctx.globalAlpha=1;ctx.fillRect(0,0,W,H);
-    /* pink streaks */
-    ctx.globalAlpha=.1;
-    for(let i=0;i<4;i++){
-      const y=(((sy*.35+i*83))%H+H)%H;
-      ctx.fillStyle='#f953c6';ctx.fillRect(0,y,W,1);
-    }
-    ctx.globalAlpha=1;
   }
 
-  function glitch(){
-    if(!glitching)return;
-    gctx.clearRect(0,0,W,H);
-    gc.style.opacity='1';
-    /* slice shift */
-    const n=Math.floor(Math.random()*10)+4;
-    for(let i=0;i<n;i++){
-      const gy=Math.floor(Math.random()*H);
-      const gh=Math.floor(Math.random()*14)+2;
-      const dx=(Math.random()-.5)*50;
-      gctx.drawImage(hc,0,gy,W,gh,dx,gy,W,gh);
-    }
-    /* channel blob */
-    gctx.globalCompositeOperation='screen';
-    gctx.globalAlpha=.18;
-    const colors=['#f953c6','#00ffb3','#4444ff'];
-    gctx.fillStyle=colors[Math.floor(Math.random()*colors.length)];
-    gctx.fillRect(Math.random()*W*.7,Math.random()*H,Math.random()*120+20,Math.random()*24+4);
-    gctx.globalCompositeOperation='source-over';
-    gctx.globalAlpha=1;
-    gtimer=setTimeout(()=>{
-      gc.style.opacity='0';
-      gctx.clearRect(0,0,W,H);
-      if(glitching)setTimeout(glitch,Math.random()*100+30);
-    },55);
-  }
-
-  wrap.addEventListener('mouseenter',()=>{glitching=true;glitch();});
-  wrap.addEventListener('mouseleave',()=>{
-    glitching=false;clearTimeout(gtimer);
-    gc.style.opacity='0';gctx.clearRect(0,0,W,H);
-  });
-  wrap.addEventListener('mousemove',(e)=>{
-    gctx.globalAlpha=.06;gctx.fillStyle='#b91d73';
-    gctx.fillRect(0,Math.floor(e.offsetY-1),W,2);
-    gctx.globalAlpha=1;
-  });
-
-  function loop(){ sy+=.55; draw(); requestAnimationFrame(loop); }
-  resize(); buildPat(); loop();
-  window.addEventListener('resize',()=>{resize();buildPat();});
+  function loop(){drawMatrix();drawParticles();requestAnimationFrame(loop);}
+  resizeM();resizeP();initParticles();loop();
+  window.addEventListener('resize',function(){resizeM();resizeP();initParticles();});
 })();
 </script>
 """
 
-# ── MODELS ──────────────────────────────────────────────────────────────────
+# ── MODELS ────────────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_models():
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    return model, client
+    m = SentenceTransformer('all-MiniLM-L6-v2')
+    c = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    return m, c
 
 model, anthropic_client = load_models()
 
@@ -380,15 +319,25 @@ def extract_chunks(text, chunk_size=500, overlap=100):
         i += chunk_size - overlap
     return chunks
 
-# ── SIDEBAR ──────────────────────────────────────────────────────────────────
+# ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown('<div class="sidebar-brand">✦ &nbsp;PDF Bot &nbsp;·&nbsp; RAG engine</div>', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="padding:14px 12px 10px;border-bottom:1px solid rgba(0,200,255,0.1);margin-bottom:14px;">
+      <div style="font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;color:#00dcff;letter-spacing:.06em;">PDF BOT</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.3);letter-spacing:.12em;margin-top:2px;">INTELLIGENCE SYSTEM</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-    uploaded_file = st.file_uploader("Drop a PDF", type="pdf", label_visibility="collapsed")
+    st.markdown('<span class="s-label">// INPUT</span>', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
 
     if uploaded_file:
-        st.markdown(f"<p style='font-family:Space Mono,monospace;font-size:0.72rem;color:#7a78a0;padding:4px 0 8px;'>📄 {uploaded_file.name}</p>", unsafe_allow_html=True)
-        if st.button("⚡ Process PDF"):
+        st.markdown(f"""
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:rgba(0,200,255,0.5);padding:6px 4px;border-left:2px solid rgba(0,200,255,0.3);margin-bottom:8px;word-break:break-all;">
+          › {uploaded_file.name}
+        </div>""", unsafe_allow_html=True)
+
+        if st.button("⚡  PROCESS & INDEX"):
             with st.spinner("Indexing…"):
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
                     tmp.write(uploaded_file.read())
@@ -396,7 +345,7 @@ with st.sidebar:
 
                 doc = fitz.open(tmp_path)
                 full_text = ""
-                progress = st.progress(0)
+                prog = st.progress(0)
                 total = len(doc)
 
                 for pnum, page in enumerate(doc):
@@ -408,8 +357,7 @@ with st.sidebar:
                             b64 = base64.b64encode(bi["image"]).decode()
                             mt = "image/png" if bi["ext"] == "png" else "image/jpeg"
                             resp = anthropic_client.messages.create(
-                                model="claude-haiku-4-5-20251001",
-                                max_tokens=300,
+                                model="claude-haiku-4-5-20251001", max_tokens=300,
                                 messages=[{"role":"user","content":[
                                     {"type":"image","source":{"type":"base64","media_type":mt,"data":b64}},
                                     {"type":"text","text":"Describe this image. If it's a diagram or chart, explain what it shows."}
@@ -418,71 +366,80 @@ with st.sidebar:
                             full_text += f"\n[Image p{pnum+1}]: {resp.content[0].text}\n"
                         except Exception:
                             continue
-                    progress.progress((pnum+1)/total)
+                    prog.progress((pnum+1)/total)
 
                 doc.close()
                 os.unlink(tmp_path)
-
                 chunks = extract_chunks(full_text)
                 embs = np.array(model.encode(chunks)).astype('float32')
                 index = faiss.IndexFlatL2(embs.shape[1])
                 index.add(embs)
-
                 st.session_state.index  = index
                 st.session_state.chunks = chunks
                 st.session_state.messages = []
+                st.session_state.chunk_count = len(chunks)
 
-            st.success(f"✅ {len(chunks)} chunks indexed")
+            st.success(f"✓ {len(chunks)} chunks indexed")
 
-    st.markdown("""
-    <div class="tip-block">
-        Ask specific questions<br>
-        Reference page numbers<br>
-        Ask for summaries<br>
-        Ask about diagrams
+    st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
+
+    # metrics
+    chunk_count = st.session_state.get("chunk_count", 0)
+    st.markdown(f"""
+    <span class="s-label">// SYSTEM METRICS</span>
+    <div class="metric-grid">
+      <div class="metric-card"><div class="metric-val">{chunk_count if chunk_count else '—'}</div><div class="metric-lbl">Chunks</div></div>
+      <div class="metric-card"><div class="metric-val">384</div><div class="metric-lbl">Embed dim</div></div>
+      <div class="metric-card"><div class="metric-val">L2</div><div class="metric-lbl">FAISS</div></div>
+      <div class="metric-card"><div class="metric-val">TOP 3</div><div class="metric-lbl">Retrieval</div></div>
     </div>
     """, unsafe_allow_html=True)
 
-    # mini noise art in sidebar footer
+    st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
+
     st.markdown("""
-    <div style="position:absolute;bottom:16px;left:16px;right:16px;
-      font-family:'Space Mono',monospace;font-size:9px;
-      color:rgba(249,83,198,.2);letter-spacing:.08em;">
-      ✦ powered by claude · faiss · sentence-transformers
+    <span class="s-label">// QUERY TIPS</span>
+    <div class="sys-tips">
+      › ask specific questions<br>
+      › reference page numbers<br>
+      › request summaries<br>
+      › ask about diagrams<br>
+      › cross-reference sections
     </div>
     """, unsafe_allow_html=True)
 
-# ── MAIN ─────────────────────────────────────────────────────────────────────
-# inject hero canvas at very top
-st.components.v1.html(HERO_HTML, height=220, scrolling=False)
+    st.markdown("""
+    <div style="position:absolute;bottom:14px;left:12px;right:12px;font-family:'Share Tech Mono',monospace;
+      font-size:8px;color:rgba(0,200,255,0.15);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.06);padding-top:10px;">
+      POWERED BY CLAUDE · FAISS · SENTENCE-TRANSFORMERS
+    </div>
+    """, unsafe_allow_html=True)
+
+# ── MAIN ──────────────────────────────────────────────────────────────────────
+st.components.v1.html(HERO_HTML, height=262, scrolling=False)
 
 if "index" not in st.session_state:
     st.markdown("""
     <div class="empty-state">
-      <div class="glyph">⬡</div>
-      <h2>Upload a PDF to begin</h2>
-      <p>your document stays local · embeddings live in memory</p>
+      <span class="glyph">⬡</span>
+      <h2>UPLOAD A DOCUMENT TO BEGIN</h2>
+      <p>// drop a pdf in the sidebar · embeddings indexed locally · ask anything</p>
     </div>
     """, unsafe_allow_html=True)
 else:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # chat history
-    for msg in st.session_state.messages:
-        # only show assistant messages (user ones have context prepended)
-        if msg["role"] == "assistant":
-            with st.chat_message("assistant"):
-                st.write(msg["content"])
-        elif msg["role"] == "user":
-            # strip context prefix for display
-            display = msg["content"]
-            if "Question: " in display:
-                display = display.split("Question: ")[-1]
-            with st.chat_message("user"):
-                st.write(display)
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
-    question = st.chat_input("✦  Ask anything about your PDF…")
+    for msg in st.session_state.messages:
+        display = msg["content"]
+        if msg["role"] == "user" and "Question: " in display:
+            display = display.split("Question: ")[-1]
+        with st.chat_message(msg["role"]):
+            st.write(display)
+
+    question = st.chat_input("// query the document…")
 
     if question:
         with st.chat_message("user"):
@@ -497,11 +454,11 @@ else:
             "content": f"Context:\n{context}\n\nQuestion: {question}"
         })
 
-        with st.spinner("✦  thinking…"):
+        with st.spinner("// processing query…"):
             response = anthropic_client.messages.create(
                 model="claude-haiku-4-5-20251001",
                 max_tokens=1024,
-                system="You are a helpful assistant and expert at reading documents. Answer questions based on the provided context. If the exact term isn't found, look for related concepts. Only say 'I don't find that in the document' if there's absolutely nothing related.",
+                system="You are an intelligent document assistant. Answer questions based on the provided context. If the exact term isn't found, look for related concepts. Only say you cannot find it if there is truly nothing related in the context.",
                 messages=st.session_state.messages
             )
 
