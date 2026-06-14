@@ -25,8 +25,30 @@ st.markdown("""
 .stToast,[class*="toast"],[class*="Toast"],
 [data-baseweb="notification"],[data-baseweb="toast"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}
 
-/* HIDE SIDEBAR COLLAPSE BUTTON COMPLETELY */
-[data-testid="stSidebarCollapseButton"]{display:none!important;visibility:hidden!important;}
+/* ── SIDEBAR COLLAPSE BUTTON — make it GLOWING & VISIBLE ── */
+[data-testid="stSidebarCollapseButton"]{
+  display:flex!important;visibility:visible!important;opacity:1!important;
+  background:rgba(0,200,255,0.15)!important;
+  border:1.5px solid rgba(0,200,255,0.6)!important;
+  border-radius:0 10px 10px 0!important;
+  box-shadow:0 0 18px rgba(0,200,255,0.4),inset 0 0 8px rgba(0,200,255,0.1)!important;
+  animation:sidebtnpulse 2s ease-in-out infinite!important;
+  width:28px!important;height:60px!important;
+  align-items:center!important;justify-content:center!important;
+}
+[data-testid="stSidebarCollapseButton"]:hover{
+  background:rgba(0,200,255,0.3)!important;
+  box-shadow:0 0 28px rgba(0,200,255,0.7)!important;
+}
+[data-testid="stSidebarCollapseButton"] svg{
+  color:#00dcff!important;
+  filter:drop-shadow(0 0 5px #00dcff)!important;
+  width:16px!important;height:16px!important;
+}
+@keyframes sidebtnpulse{
+  0%,100%{box-shadow:0 0 12px rgba(0,200,255,0.3);}
+  50%{box-shadow:0 0 26px rgba(0,200,255,0.7),0 0 40px rgba(0,200,255,0.3);}
+}
 
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
 [data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;min-width:260px!important;}
@@ -55,12 +77,47 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#002a40,#005580)!important;border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#1a0050,#4400cc)!important;border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;}
 
-[data-testid="stChatInput"]{background:rgba(0,2,15,0.96)!important;border-top:1px solid rgba(0,200,255,0.14)!important;padding:12px 20px!important;}
-[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.3)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;box-shadow:none!important;}
-[data-testid="stChatInput"] textarea:focus{border-color:rgba(0,200,255,0.9)!important;box-shadow:0 0 0 2px rgba(0,200,255,0.18),0 0 28px rgba(0,200,255,0.22)!important;outline:none!important;}
+/* ── CHAT INPUT — NO RED BORDER EVER ── */
+[data-testid="stChatInput"]{
+  background:rgba(0,2,15,0.96)!important;
+  border-top:1px solid rgba(0,200,255,0.14)!important;
+  padding:12px 20px!important;
+  outline:none!important;
+  box-shadow:none!important;
+}
+[data-testid="stChatInput"] textarea{
+  background:rgba(0,200,255,0.04)!important;
+  border:1.5px solid rgba(0,200,255,0.3)!important;
+  border-radius:26px!important;
+  color:#a8dcf8!important;
+  font-family:'Inter',sans-serif!important;
+  font-size:0.9rem!important;
+  padding:11px 20px!important;
+  outline:none!important;
+  box-shadow:none!important;
+  caret-color:#00dcff!important;
+}
+[data-testid="stChatInput"] textarea:focus,
+[data-testid="stChatInput"] textarea:focus-visible,
+[data-testid="stChatInput"] textarea:active{
+  border:1.5px solid rgba(0,200,255,0.8)!important;
+  outline:none!important;
+  box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;
+  background:rgba(0,200,255,0.06)!important;
+}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
 [data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
-*:focus{outline:none!important;}
+[data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.3)!important;box-shadow:0 0 16px rgba(0,200,255,0.4)!important;}
+
+/* Kill ALL red/default focus rings sitewide */
+*:focus,*:focus-visible,*:focus-within{
+  outline:none!important;
+  box-shadow:none!important;
+}
+/* Re-apply ONLY cyan glow on the textarea specifically */
+[data-testid="stChatInput"] textarea:focus{
+  box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;
+}
 
 ::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.25);border-radius:2px;}
 
@@ -319,13 +376,11 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── UPLOAD ──
     st.markdown('<span class="s-label">// Document</span>', unsafe_allow_html=True)
     if "show_uploader" not in st.session_state:
         st.session_state.show_uploader = True
 
-    btn_label = "📂  UPLOAD / CHANGE PDF"
-    if st.button(btn_label, key="toggle_upload"):
+    if st.button("📂  UPLOAD / CHANGE PDF", key="toggle_upload"):
         st.session_state.show_uploader = not st.session_state.show_uploader
         st.rerun()
 
@@ -418,7 +473,6 @@ with st.sidebar:
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
-    # metrics
     cc = st.session_state.get("chunk_count",0)
     ic = st.session_state.get("image_count",0)
     pc = st.session_state.get("page_count",0)
@@ -446,70 +500,65 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── BUILT BY — always at bottom ──
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
+
+    # ── BUILT BY — Streamlit native buttons so dropdowns actually work ──
+    st.markdown('<span class="s-label">// Built by</span>', unsafe_allow_html=True)
     st.markdown("""
-    <style>
-    .cb-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:.18em;color:rgba(0,200,255,0.28);text-transform:uppercase;margin-bottom:6px;display:block;}
-    .cb-name{font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:rgba(0,200,255,0.6);margin-bottom:10px;}
-    .cb-row{display:flex;gap:6px;margin-bottom:0;}
-    .cb-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 6px;border:1px solid rgba(0,200,255,0.2);border-radius:7px;font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(0,200,255,0.55);cursor:pointer;background:rgba(0,200,255,0.03);transition:all .2s;user-select:none;}
-    .cb-btn:hover{border-color:rgba(0,200,255,0.6);color:#00dcff;background:rgba(0,200,255,0.08);box-shadow:0 0 12px rgba(0,200,255,0.15);}
-    .cb-dropdown{display:none;margin-top:4px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:8px;padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.6);animation:dropIn 0.2s ease;position:relative;z-index:100;}
-    .cb-dropdown a{color:#00dcff;text-decoration:none;word-break:break-all;}
-    .cb-dropdown a:hover{text-decoration:underline;}
-    .cb-copy-btn{float:right;cursor:pointer;color:rgba(0,200,255,0.4);font-size:0.5rem;border:1px solid rgba(0,200,255,0.2);padding:1px 6px;border-radius:4px;transition:all .2s;}
-    .cb-copy-btn:hover{color:#00dcff;border-color:rgba(0,200,255,0.6);}
-    @keyframes dropIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-    .cb-footer{margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;}
-    </style>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;
+      color:rgba(0,200,255,0.6);margin-bottom:10px;">
+      Sai Jyothi Gayathri Adabala
+    </div>""", unsafe_allow_html=True)
 
-    <span class="cb-label">// Built by</span>
-    <div class="cb-name">Sai Jyothi Gayathri Adabala</div>
-    <div class="cb-row">
-      <div class="cb-btn" id="email-btn" onclick="toggleDrop('email-drop','li-drop')">✉ email</div>
-      <div class="cb-btn" id="li-btn" onclick="toggleDrop('li-drop','email-drop')">in linkedin</div>
-    </div>
+    col1, col2 = st.columns(2)
+    if col1.button("✉ email", key="btn_email"):
+        st.session_state["contact_show"] = "email" if st.session_state.get("contact_show") != "email" else None
+    if col2.button("in linkedin", key="btn_li"):
+        st.session_state["contact_show"] = "linkedin" if st.session_state.get("contact_show") != "linkedin" else None
 
-    <div id="email-drop" class="cb-dropdown">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-        <span>asjyothig@gmail.com</span>
-        <span class="cb-copy-btn" onclick="copyEmail(this)">copy</span>
-      </div>
-    </div>
+    cs = st.session_state.get("contact_show")
+    if cs == "email":
+        st.markdown("""
+        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
+          border-radius:8px;padding:10px 14px;animation:dropIn 0.2s ease;">
+          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;
+            letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;
+            color:rgba(0,200,255,0.75);letter-spacing:.04em;">
+            ✉ &nbsp;asjyothig@gmail.com
+          </div>
+          <div style="font-size:0.46rem;color:rgba(0,200,255,0.22);margin-top:5px;
+            font-family:'Share Tech Mono',monospace;letter-spacing:.08em;">
+            // copy and email anytime
+          </div>
+        </div>
+        <style>@keyframes dropIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}</style>
+        """, unsafe_allow_html=True)
+    elif cs == "linkedin":
+        st.markdown("""
+        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
+          border-radius:8px;padding:10px 14px;animation:dropIn 0.2s ease;">
+          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;
+            letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
+          <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/"
+             target="_blank"
+             style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#00dcff;
+               text-decoration:none;display:block;
+               border:1px solid rgba(0,200,255,0.35);border-radius:6px;
+               padding:7px 10px;text-align:center;background:rgba(0,200,255,0.06);
+               transition:all .2s;">
+            → Open LinkedIn Profile ↗
+          </a>
+        </div>
+        <style>@keyframes dropIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}</style>
+        """, unsafe_allow_html=True)
 
-    <div id="li-drop" class="cb-dropdown">
-      <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank">
-        → linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b
-      </a>
-    </div>
-
-    <div class="cb-footer">CLAUDE · FAISS · SENTENCE-TRANSFORMERS</div>
-
-    <script>
-    function toggleDrop(showId, hideId){
-      var show=document.getElementById(showId);
-      var hide=document.getElementById(hideId);
-      hide.style.display='none';
-      show.style.display=show.style.display==='block'?'none':'block';
-    }
-    function copyEmail(btn){
-      var email='asjyothig@gmail.com';
-      if(navigator.clipboard){
-        navigator.clipboard.writeText(email).then(function(){
-          var orig=btn.textContent;btn.textContent='✓ copied!';
-          setTimeout(function(){btn.textContent=orig;},1800);
-        });
-      } else {
-        var ta=document.createElement('textarea');ta.value=email;
-        document.body.appendChild(ta);ta.select();document.execCommand('copy');
-        document.body.removeChild(ta);
-        var orig=btn.textContent;btn.textContent='✓ copied!';
-        setTimeout(function(){btn.textContent=orig;},1800);
-      }
-    }
-    </script>
-    """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;
+      color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;
+      border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">
+      CLAUDE · FAISS · SENTENCE-TRANSFORMERS
+    </div>""", unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
