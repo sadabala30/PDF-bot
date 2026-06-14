@@ -20,51 +20,63 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-#MainMenu,footer,header,[data-testid="stToolbar"],.stDeployButton{display:none!important;visibility:hidden!important;}
+
+/* ── HIDE ALL STREAMLIT CHROME & TOASTS ── */
+#MainMenu,footer,header,[data-testid="stToolbar"],.stDeployButton,
+[data-testid="stNotificationActionButton"],
+[data-testid="toastContainer"],
+.stToast, [class*="toast"], [class*="Toast"],
+div[aria-live="polite"]:not([data-testid="stChatInput"]),
+[data-baseweb="notification"],[data-baseweb="toast"]{
+  display:none!important;visibility:hidden!important;pointer-events:none!important;
+}
+
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
 [data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;}
 [data-testid="stSidebar"]>div{padding-top:0!important;}
 
-/* ── SIDEBAR TOGGLE — always visible glowing tab ── */
+/* ── SIDEBAR COLLAPSE BUTTON — always glowing, always visible ── */
 [data-testid="stSidebarCollapseButton"]{
-  position:fixed!important;
-  top:50%!important;
-  left:0!important;
-  transform:translateY(-50%)!important;
-  z-index:9999!important;
-  background:rgba(0,200,255,0.12)!important;
-  border:1px solid rgba(0,200,255,0.5)!important;
-  border-left:none!important;
-  border-radius:0 8px 8px 0!important;
-  width:22px!important;
-  height:60px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  box-shadow:4px 0 20px rgba(0,200,255,0.25)!important;
+  position:fixed!important;top:50%!important;left:0!important;
+  transform:translateY(-50%)!important;z-index:99999!important;
+  background:rgba(0,200,255,0.1)!important;
+  border:1px solid rgba(0,200,255,0.55)!important;border-left:none!important;
+  border-radius:0 10px 10px 0!important;
+  width:20px!important;height:56px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
   animation:tabpulse 2.5s ease-in-out infinite!important;
-  cursor:pointer!important;
 }
-[data-testid="stSidebarCollapseButton"]:hover{
-  background:rgba(0,200,255,0.3)!important;
-  box-shadow:4px 0 30px rgba(0,200,255,0.5)!important;
-}
-[data-testid="stSidebarCollapseButton"] svg{
-  color:#00dcff!important;
-  width:12px!important;
-  height:12px!important;
-}
-@keyframes tabpulse{0%,100%{box-shadow:4px 0 14px rgba(0,200,255,0.2);}50%{box-shadow:4px 0 28px rgba(0,200,255,0.5);}}
+[data-testid="stSidebarCollapseButton"]:hover{background:rgba(0,200,255,0.28)!important;box-shadow:4px 0 24px rgba(0,200,255,0.55)!important;}
+[data-testid="stSidebarCollapseButton"] svg{color:#00dcff!important;width:10px!important;height:10px!important;}
+@keyframes tabpulse{0%,100%{box-shadow:3px 0 10px rgba(0,200,255,0.2);}50%{box-shadow:3px 0 24px rgba(0,200,255,0.55);}}
 
-[data-testid="stFileUploader"]{background:rgba(0,200,255,0.03)!important;border:1px solid rgba(0,200,255,0.2)!important;border-radius:8px!important;}
-[data-testid="stFileUploader"]:hover{border-color:rgba(0,200,255,0.6)!important;}
-[data-testid="stFileUploader"] label{color:rgba(0,200,255,0.6)!important;font-family:'Share Tech Mono',monospace!important;font-size:0.72rem!important;}
+/* ── FILE UPLOADER — fancy dashed glow like the screenshot ── */
+[data-testid="stFileUploader"]{
+  background:rgba(0,10,30,0.6)!important;
+  border:2px dashed rgba(0,200,255,0.45)!important;
+  border-radius:12px!important;
+  position:relative!important;
+  transition:all 0.3s!important;
+  box-shadow:0 0 18px rgba(0,200,255,0.12),inset 0 0 18px rgba(0,200,255,0.04)!important;
+}
+[data-testid="stFileUploader"]:hover{
+  border-color:rgba(0,200,255,0.85)!important;
+  box-shadow:0 0 32px rgba(0,200,255,0.28),inset 0 0 24px rgba(0,200,255,0.08)!important;
+}
+[data-testid="stFileUploader"] label{color:rgba(0,200,255,0.7)!important;font-family:'Share Tech Mono',monospace!important;font-size:0.72rem!important;}
 [data-testid="stFileUploader"] section{border:none!important;background:transparent!important;}
-[data-testid="stFileUploader"] button{border-color:rgba(0,200,255,0.4)!important;color:#00dcff!important;background:transparent!important;}
+[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"]{color:rgba(0,200,255,0.5)!important;font-family:'Share Tech Mono',monospace!important;}
+[data-testid="stFileUploader"] small{color:rgba(0,200,255,0.3)!important;font-family:'Share Tech Mono',monospace!important;}
+[data-testid="stFileUploader"] button{
+  border:1px solid rgba(0,200,255,0.4)!important;color:#00dcff!important;
+  background:rgba(0,200,255,0.06)!important;border-radius:6px!important;
+  font-family:'Share Tech Mono',monospace!important;font-size:0.65rem!important;
+}
+[data-testid="stFileUploader"] svg{color:rgba(0,200,255,0.4)!important;}
 
 .stButton>button{background:transparent!important;border:1px solid rgba(0,200,255,0.4)!important;color:#00dcff!important;border-radius:6px!important;font-family:'Share Tech Mono',monospace!important;font-size:0.7rem!important;letter-spacing:0.1em!important;width:100%!important;padding:9px!important;text-transform:uppercase!important;transition:all 0.25s!important;animation:pulsebtn 2.2s ease-in-out infinite!important;}
 .stButton>button:hover{background:rgba(0,200,255,0.12)!important;border-color:#00dcff!important;box-shadow:0 0 22px rgba(0,200,255,0.3)!important;}
-@keyframes pulsebtn{0%,100%{box-shadow:0 0 8px rgba(0,200,255,0.15)}50%{box-shadow:0 0 22px rgba(0,200,255,0.38)}}
+@keyframes pulsebtn{0%,100%{box-shadow:0 0 8px rgba(0,200,255,0.12)}50%{box-shadow:0 0 20px rgba(0,200,255,0.35)}}
 
 .stProgress>div>div{background:linear-gradient(90deg,#00dcff,#00ff88)!important;}
 .stProgress>div{background:rgba(0,200,255,0.08)!important;border-radius:0!important;}
@@ -73,43 +85,50 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 
 /* ── WHATSAPP-STYLE CHAT ── */
 [data-testid="stChatMessage"]{background:transparent!important;border:none!important;padding:3px 20px!important;margin-bottom:4px!important;}
-
-/* Bot — left */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"])>div:last-child{
   background:rgba(0,18,38,0.92)!important;border:1px solid rgba(0,200,255,0.18)!important;
   border-radius:2px 18px 18px 18px!important;padding:13px 17px!important;
   font-size:0.88rem!important;line-height:1.75!important;color:#cce8ff!important;max-width:65%!important;
-  box-shadow:0 3px 16px rgba(0,200,255,0.07)!important;
 }
-
-/* User — right */
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"])>div:last-child{
   background:linear-gradient(135deg,rgba(0,100,200,0.4),rgba(60,0,180,0.45))!important;
   border:1px solid rgba(80,160,255,0.35)!important;
   border-radius:18px 2px 18px 18px!important;padding:13px 17px!important;
   font-size:0.88rem!important;line-height:1.75!important;color:#e8f6ff!important;max-width:65%!important;
-  box-shadow:0 3px 16px rgba(80,120,255,0.15)!important;
 }
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]){flex-direction:row-reverse!important;}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#002a40,#005580)!important;border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#1a0050,#4400cc)!important;border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;}
 
-/* Avatars */
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{
-  background:linear-gradient(135deg,#002a40,#005580)!important;
-  border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;
-}
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{
-  background:linear-gradient(135deg,#1a0050,#4400cc)!important;
-  border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;
-}
-
-/* ── CHAT INPUT — blue glow only ── */
+/* ── CHAT INPUT — KILL THE RED RING COMPLETELY ── */
 [data-testid="stChatInput"]{background:rgba(0,2,15,0.96)!important;border-top:1px solid rgba(0,200,255,0.14)!important;padding:12px 20px!important;}
-[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.28)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;}
-[data-testid="stChatInput"] textarea:focus{border-color:rgba(0,210,255,0.85)!important;box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 30px rgba(0,200,255,0.2)!important;outline:none!important;}
-[data-testid="stChatInput"] textarea:focus-visible{outline:none!important;}
+[data-testid="stChatInput"] textarea{
+  background:rgba(0,200,255,0.04)!important;
+  border:1.5px solid rgba(0,200,255,0.3)!important;
+  border-radius:26px!important;color:#a8dcf8!important;
+  font-family:'Inter',sans-serif!important;font-size:0.9rem!important;
+  padding:11px 20px!important;
+  outline:none!important;box-shadow:none!important;
+}
+[data-testid="stChatInput"] textarea:focus,
+[data-testid="stChatInput"] textarea:focus-within,
+[data-testid="stChatInput"] textarea:focus-visible{
+  border-color:rgba(0,200,255,0.9)!important;
+  box-shadow:0 0 0 2px rgba(0,200,255,0.18),0 0 28px rgba(0,200,255,0.22)!important;
+  outline:none!important;
+}
+/* The outer wrapper that Streamlit gives a red ring */
+[data-testid="stChatInput"]>div,[data-testid="stChatInput"]>div>div{
+  outline:none!important;box-shadow:none!important;border-color:transparent!important;
+}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
-[data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
+[data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;transition:all 0.2s!important;}
+[data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.32)!important;box-shadow:0 0 16px rgba(0,200,255,0.4)!important;}
+
+/* Nuclear: kill every red/default focus ring */
 *:focus{outline:none!important;}
+*:focus-visible{outline:none!important;}
+*[class*="focused"]{box-shadow:none!important;}
 
 ::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.25);border-radius:2px;}
 
@@ -124,14 +143,10 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 .s-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:.18em;color:rgba(0,200,255,0.28);text-transform:uppercase;margin-bottom:6px;display:block;}
 .ts{font-family:'Share Tech Mono',monospace;font-size:0.57rem;color:rgba(0,200,255,0.2);margin-top:5px;display:block;}
 .ts-right{text-align:right;}.ts-left{text-align:left;}
-
-/* ── IMAGE FRAME ── */
 .img-frame{border:1px solid rgba(0,200,255,0.2);border-radius:8px;overflow:hidden;margin:10px 0;}
 .img-frame-label{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.5);padding:6px 12px;border-bottom:1px solid rgba(0,200,255,0.1);letter-spacing:.1em;display:flex;justify-content:space-between;}
 .img-slide{animation:slideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;opacity:0;transform:translateY(20px);}
 @keyframes slideIn{to{opacity:1;transform:translateY(0)}}
-
-/* ── THINKING ANIMATION ── */
 .claude-thinking{font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:rgba(0,200,255,0.5);padding:10px 14px;background:rgba(0,18,38,0.6);border:1px solid rgba(0,200,255,0.12);border-radius:8px;margin:4px 20px;line-height:2;}
 .think-line{animation:thinkfade 1.2s ease-in-out infinite;}
 .think-line:nth-child(2){animation-delay:.2s}.think-line:nth-child(3){animation-delay:.4s}
@@ -142,8 +157,6 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 .rc-line{animation:rcfade 0.4s ease forwards;opacity:0;font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.4);line-height:1.9;}
 .rc-line:nth-child(2){animation-delay:.15s}.rc-line:nth-child(3){animation-delay:.3s}
 @keyframes rcfade{to{opacity:1}}
-
-/* ── SUGGESTION BAR ── */
 .sug-bar{display:flex;gap:7px;align-items:center;padding:7px 20px;border-bottom:1px solid rgba(0,200,255,0.07);background:rgba(0,2,14,0.85);overflow-x:auto;flex-wrap:nowrap;}
 .sug-prefix{font-family:'Share Tech Mono',monospace;font-size:0.5rem;color:rgba(0,200,255,0.3);letter-spacing:.14em;white-space:nowrap;}
 .sug-tag{font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.5);border:1px solid rgba(0,200,255,0.2);padding:4px 12px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:all 0.2s;background:rgba(0,200,255,0.03);}
@@ -151,42 +164,39 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 </style>
 """, unsafe_allow_html=True)
 
-# ── SIDEBAR OPEN ARROW (always visible when sidebar is collapsed) ──────────────
-# Inject a persistent floating button via components for when sidebar is hidden
-SIDEBAR_OPEN_BTN = """
-<style>
-body{margin:0;background:transparent;}
-#sob{
-  position:fixed;top:50%;left:0;transform:translateY(-50%);
-  z-index:99999;
-  width:24px;height:64px;
-  background:rgba(0,200,255,0.12);
-  border:1px solid rgba(0,200,255,0.55);
-  border-left:none;
-  border-radius:0 10px 10px 0;
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;
-  box-shadow:4px 0 20px rgba(0,200,255,0.3);
-  animation:sobpulse 2.5s ease-in-out infinite;
-  font-size:11px;color:#00dcff;
-  text-align:center;
-  user-select:none;
-  transition:all 0.2s;
-}
-#sob:hover{background:rgba(0,200,255,0.28);box-shadow:4px 0 30px rgba(0,200,255,0.55);}
-@keyframes sobpulse{0%,100%{box-shadow:4px 0 14px rgba(0,200,255,0.2);}50%{box-shadow:4px 0 30px rgba(0,200,255,0.55);}}
-</style>
-<div id="sob" onclick="openSidebar()" title="Open sidebar">▶</div>
+# ── RED RING KILLER — MutationObserver runs in actual DOM ─────────────────────
+RED_RING_KILLER = """
 <script>
-function openSidebar(){
-  var doc=window.parent.document;
-  // try collapse button (it toggles)
-  var btn=doc.querySelector('[data-testid="stSidebarCollapseButton"]');
-  if(btn){btn.click();return;}
-  // fallback: look for any sidebar toggle
-  var btns=doc.querySelectorAll('button');
-  for(var b of btns){if(b.getAttribute('aria-label')||''.toLowerCase().includes('sidebar')){b.click();return;}}
-}
+(function(){
+  var BLUE = '0 0 0 2px rgba(0,200,255,0.2), 0 0 28px rgba(0,200,255,0.22)';
+  var RED_RE = /rgb\(255[\s,]+\d+[\s,]+\d+\)|rgba\(255[\s,]+\d+[\s,]+\d+/i;
+  function fixAll(){
+    document.querySelectorAll('*').forEach(function(el){
+      var cs = window.getComputedStyle(el);
+      var bs = cs.boxShadow || '';
+      var oc = cs.outlineColor || '';
+      if(RED_RE.test(bs)||RED_RE.test(oc)){
+        el.style.setProperty('box-shadow','none','important');
+        el.style.setProperty('outline','none','important');
+      }
+    });
+    // specifically fix chat input wrapper
+    var wrap = document.querySelector('[data-testid="stChatInput"]');
+    if(wrap){
+      wrap.style.setProperty('box-shadow','none','important');
+      wrap.style.setProperty('outline','none','important');
+      [].forEach.call(wrap.querySelectorAll('*'),function(c){
+        c.style.removeProperty('box-shadow');
+        c.style.removeProperty('outline');
+      });
+    }
+  }
+  var obs = new MutationObserver(fixAll);
+  obs.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['style','class']});
+  document.addEventListener('focusin', fixAll);
+  document.addEventListener('focusout', fixAll);
+  setInterval(fixAll, 400);
+})();
 </script>
 """
 
@@ -242,7 +252,6 @@ HERO_HTML = """
 </script>
 """
 
-# ── RAG PIPELINE ANIMATION ────────────────────────────────────────────────────
 RAG_PIPELINE_HTML = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap');
@@ -296,7 +305,6 @@ RAG_PIPELINE_HTML = """
 </script>
 """
 
-# ── EMPTY STATE ───────────────────────────────────────────────────────────────
 EMPTY_STATE_HTML = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
@@ -329,7 +337,7 @@ EMPTY_STATE_HTML = """
 </script>
 """
 
-# ── SUGGESTION BAR — injects text into Streamlit chat input ──────────────────
+# ── SUGGESTION BAR with working inject ───────────────────────────────────────
 CHAT_BANNER_HTML = """
 <style>
 body{margin:0;background:rgba(0,2,14,0.85);}
@@ -337,6 +345,7 @@ body{margin:0;background:rgba(0,2,14,0.85);}
 .sug-prefix{font-family:'Share Tech Mono',monospace;font-size:0.5rem;color:rgba(0,200,255,0.3);letter-spacing:.14em;white-space:nowrap;}
 .sug-tag{font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.5);border:1px solid rgba(0,200,255,0.2);padding:4px 12px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:all 0.2s;background:rgba(0,200,255,0.03);}
 .sug-tag:hover{color:#00dcff;border-color:rgba(0,200,255,0.7);background:rgba(0,200,255,0.1);box-shadow:0 0 10px rgba(0,200,255,0.2);}
+.sug-tag:active{transform:scale(0.96);}
 </style>
 <div class="sug-bar">
   <div class="sug-prefix">TRY →</div>
@@ -350,16 +359,15 @@ body{margin:0;background:rgba(0,2,14,0.85);}
 <script>
 function inject(el){
   var text = el.textContent.trim();
-  var doc  = window.parent.document;
-  // Find the Streamlit chat textarea
-  var ta = doc.querySelector('[data-testid="stChatInput"] textarea');
-  if(!ta) ta = doc.querySelector('textarea');
-  if(!ta) return;
-  // Use React's synthetic event system to properly set value
-  var nativeSetter = Object.getOwnPropertyDescriptor(window.parent.HTMLTextAreaElement.prototype, 'value').set;
+  var pdoc = window.parent.document;
+  var ta = pdoc.querySelector('[data-testid="stChatInput"] textarea');
+  if(!ta){ ta = pdoc.querySelector('textarea'); }
+  if(!ta){ return; }
+  // React native input setter trick
+  var nativeSetter = Object.getOwnPropertyDescriptor(window.parent.HTMLTextAreaElement.prototype,'value').set;
   nativeSetter.call(ta, text);
-  ta.dispatchEvent(new Event('input', {bubbles: true}));
-  ta.dispatchEvent(new Event('change', {bubbles: true}));
+  ta.dispatchEvent(new window.parent.Event('input',{bubbles:true}));
+  ta.dispatchEvent(new window.parent.Event('change',{bubbles:true}));
   ta.focus();
   ta.setSelectionRange(text.length, text.length);
 }
@@ -423,20 +431,59 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Built by — near top ──
+    # ── BUILT BY with clickable dropdowns ──
     st.markdown("""
     <span class="s-label">// Built by</span>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:rgba(0,200,255,0.65);margin-bottom:7px;">Sai Jyothi Gayathri Adabala</div>
-    <div style="display:flex;gap:6px;margin-bottom:10px;">
-      <div onclick="copyEmail()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;border:1px solid rgba(0,200,255,0.18);border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:.5rem;color:rgba(0,200,255,0.5);cursor:pointer;background:rgba(0,200,255,0.02);transition:all .2s;">✉ email</div>
-      <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;border:1px solid rgba(0,200,255,0.18);border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:.5rem;color:rgba(0,200,255,0.5);text-decoration:none;background:rgba(0,200,255,0.02);">in linkedin</a>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:rgba(0,200,255,0.65);margin-bottom:8px;">Sai Jyothi Gayathri Adabala</div>
+
+    <style>
+    .cb-row{display:flex;gap:6px;margin-bottom:4px;}
+    .cb-btn{
+      flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+      padding:7px 6px;border:1px solid rgba(0,200,255,0.2);border-radius:7px;
+      font-family:'Share Tech Mono',monospace;font-size:.55rem;
+      color:rgba(0,200,255,0.55);cursor:pointer;
+      background:rgba(0,200,255,0.03);transition:all .2s;user-select:none;
+    }
+    .cb-btn:hover{border-color:rgba(0,200,255,0.6);color:#00dcff;background:rgba(0,200,255,0.08);box-shadow:0 0 12px rgba(0,200,255,0.15);}
+    .cb-dropdown{
+      display:none;margin-top:3px;margin-bottom:4px;
+      background:rgba(0,10,28,0.95);border:1px solid rgba(0,200,255,0.2);
+      border-radius:7px;padding:8px 12px;
+      font-family:'Share Tech Mono',monospace;font-size:0.6rem;
+      color:rgba(0,200,255,0.6);letter-spacing:.04em;
+      animation:dropIn 0.2s ease;
+    }
+    .cb-dropdown a{color:#00dcff;text-decoration:none;}
+    .cb-dropdown a:hover{text-decoration:underline;}
+    @keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+    </style>
+
+    <div class="cb-row">
+      <div class="cb-btn" onclick="toggleDrop('email-drop')">✉ email</div>
+      <div class="cb-btn" onclick="toggleDrop('li-drop')">in linkedin</div>
     </div>
-    <div id="toast" style="display:none;background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.35);color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:0.6rem;padding:5px 10px;border-radius:6px;margin-bottom:6px;text-align:center;">✓ email copied!</div>
+    <div id="email-drop" class="cb-dropdown">
+      ✉ <a href="mailto:asjyothig@gmail.com">asjyothig@gmail.com</a>
+      <span onclick="copyText('asjyothig@gmail.com',this)"
+        style="float:right;cursor:pointer;color:rgba(0,200,255,0.4);font-size:0.5rem;">copy</span>
+    </div>
+    <div id="li-drop" class="cb-dropdown">
+      <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank">
+        linkedin.com/in/sai-jyothi-gayathri-adabala
+      </a>
+    </div>
     <script>
-    function copyEmail(){
-      navigator.clipboard.writeText('asjyothig@gmail.com').then(function(){
-        var t=document.getElementById('toast');t.style.display='block';
-        setTimeout(function(){t.style.display='none';},2000);
+    function toggleDrop(id){
+      var el=document.getElementById(id);
+      var other=id==='email-drop'?'li-drop':'email-drop';
+      document.getElementById(other).style.display='none';
+      el.style.display=el.style.display==='block'?'none':'block';
+    }
+    function copyText(txt,btn){
+      navigator.clipboard.writeText(txt).then(function(){
+        var old=btn.textContent;btn.textContent='✓ done!';
+        setTimeout(function(){btn.textContent=old;},1500);
       });
     }
     </script>
@@ -444,14 +491,12 @@ with st.sidebar:
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
-    # ── Upload section with toggle ──
+    # ── Upload toggle ──
     st.markdown('<span class="s-label">// Document</span>', unsafe_allow_html=True)
-
     if "show_uploader" not in st.session_state:
         st.session_state.show_uploader = True
 
-    # Always-visible toggle button
-    btn_label = "📂  UPLOAD NEW PDF" if not st.session_state.show_uploader else "📂  CHANGE PDF"
+    btn_label = "📂  CHANGE PDF" if not st.session_state.show_uploader else "📂  UPLOAD / CHANGE PDF"
     if st.button(btn_label, key="toggle_upload"):
         st.session_state.show_uploader = not st.session_state.show_uploader
         st.rerun()
@@ -469,42 +514,38 @@ with st.sidebar:
                 proc_ph = st.empty()
                 STEPS = ["extracting text + OCR","analyzing images","chunking document","generating embeddings","building FAISS index","ready for queries"]
 
-                def show_proc(step, pct, current_label="", chunks_so_far=0, images_so_far=0):
+                def show_proc(step, pct, chunks_n=0, images_n=0):
                     rows = ""
                     for i, lbl in enumerate(STEPS):
-                        col  = "rgba(0,255,136,0.8)" if i < step else ("rgba(0,200,255,0.95)" if i == step else "rgba(0,200,255,0.18)")
+                        col  = "rgba(0,255,136,0.85)" if i < step else ("rgba(0,200,255,0.95)" if i == step else "rgba(0,200,255,0.18)")
                         ind  = "✓" if i < step else ("●" if i == step else "○")
-                        rows += f'<div style="font-family:Share Tech Mono,monospace;font-size:0.62rem;color:{col};padding:3px 0;letter-spacing:.05em;display:flex;align-items:center;gap:8px;"><span style="color:{col};font-size:0.7rem;">{ind}</span> > {lbl}</div>'
-
+                        rows += (f'<div style="font-family:Share Tech Mono,monospace;font-size:0.62rem;'
+                                 f'color:{col};padding:3px 0;letter-spacing:.05em;">'
+                                 f'<span>{ind}</span> &gt; {lbl}</div>')
                     stats = ""
-                    if chunks_so_far > 0:
-                        stats = f"""
-                        <div style="display:flex;gap:24px;margin-top:14px;padding-top:10px;border-top:1px solid rgba(0,200,255,0.1);">
-                          <div style="text-align:center;">
-                            <div style="font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:#00dcff;">{chunks_so_far}</div>
-                            <div style="font-family:'Share Tech Mono',monospace;font-size:0.48rem;color:rgba(0,200,255,0.35);letter-spacing:.1em;">chunks</div>
-                          </div>
-                          <div style="text-align:center;">
-                            <div style="font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:#00ff88;">{images_so_far}</div>
-                            <div style="font-family:'Share Tech Mono',monospace;font-size:0.48rem;color:rgba(0,200,255,0.35);letter-spacing:.1em;">images</div>
-                          </div>
-                        </div>"""
-
-                    proc_ph.markdown(f"""
-                    <div style="background:rgba(0,6,22,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:14px;padding:20px 20px 16px;margin:6px 0;backdrop-filter:blur(10px);">
-                      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-                        <div style="font-family:'Orbitron',monospace;font-size:0.62rem;color:rgba(0,200,255,0.4);letter-spacing:.1em;font-weight:700;width:28px;height:28px;border:1px solid rgba(0,200,255,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center;">⬡</div>
-                        <div>
-                          <div style="font-family:'Orbitron',monospace;font-size:0.72rem;color:#00dcff;letter-spacing:.08em;font-weight:700;">{STEPS[min(step, len(STEPS)-1)].upper()}</div>
-                          <div style="font-family:'Share Tech Mono',monospace;font-size:0.48rem;color:rgba(0,200,255,0.3);letter-spacing:.06em;margin-top:1px;">{uploaded_file.name}</div>
-                        </div>
-                      </div>
-                      <div style="background:rgba(0,200,255,0.06);border-radius:2px;height:2px;margin-bottom:14px;overflow:hidden;">
-                        <div style="height:2px;background:linear-gradient(90deg,#00dcff,#00ff88);width:{pct}%;transition:width 0.5s ease;"></div>
-                      </div>
-                      <div>{rows}</div>
-                      {stats}
-                    </div>""", unsafe_allow_html=True)
+                    if chunks_n > 0:
+                        stats = (f'<div style="display:flex;gap:24px;margin-top:12px;padding-top:10px;'
+                                 f'border-top:1px solid rgba(0,200,255,0.1);">'
+                                 f'<div style="text-align:center;">'
+                                 f'<div style="font-family:Orbitron,monospace;font-size:1.1rem;font-weight:700;color:#00dcff;">{chunks_n}</div>'
+                                 f'<div style="font-family:Share Tech Mono,monospace;font-size:0.48rem;color:rgba(0,200,255,0.35);letter-spacing:.1em;">chunks</div></div>'
+                                 f'<div style="text-align:center;">'
+                                 f'<div style="font-family:Orbitron,monospace;font-size:1.1rem;font-weight:700;color:#00ff88;">{images_n}</div>'
+                                 f'<div style="font-family:Share Tech Mono,monospace;font-size:0.48rem;color:rgba(0,200,255,0.35);letter-spacing:.1em;">images</div></div></div>')
+                    html = (f'<div style="background:rgba(0,6,22,0.97);border:1px solid rgba(0,200,255,0.22);'
+                            f'border-radius:14px;padding:18px 18px 14px;">'
+                            f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+                            f'<div style="width:26px;height:26px;border:1px solid rgba(0,200,255,0.35);border-radius:6px;'
+                            f'display:flex;align-items:center;justify-content:center;font-family:Orbitron,monospace;'
+                            f'font-size:0.55rem;color:rgba(0,200,255,0.6);">⬡</div>'
+                            f'<div><div style="font-family:Orbitron,monospace;font-size:0.7rem;color:#00dcff;'
+                            f'letter-spacing:.08em;font-weight:700;">{STEPS[min(step,len(STEPS)-1)].upper()}</div>'
+                            f'<div style="font-family:Share Tech Mono,monospace;font-size:0.46rem;'
+                            f'color:rgba(0,200,255,0.3);margin-top:1px;">{uploaded_file.name}</div></div></div>'
+                            f'<div style="background:rgba(0,200,255,0.06);border-radius:2px;height:2px;margin-bottom:12px;overflow:hidden;">'
+                            f'<div style="height:2px;background:linear-gradient(90deg,#00dcff,#00ff88);width:{pct}%;transition:width 0.5s ease;"></div></div>'
+                            f'{rows}{stats}</div>')
+                    proc_ph.markdown(html, unsafe_allow_html=True)
 
                 show_proc(0, 5)
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
@@ -533,16 +574,16 @@ with st.sidebar:
                             img_idx += 1
                             full_text += f"\n[Image {img_idx} on page {pnum+1}]: {desc}\n"
                         except: continue
-                    show_proc(1, 15+int((pnum+1)/total*30), images_so_far=img_idx)
+                    show_proc(1, 15+int((pnum+1)/total*30), images_n=img_idx)
 
                 doc.close(); os.unlink(tmp_path)
-                show_proc(2, 50, images_so_far=img_idx)
+                show_proc(2, 50, images_n=img_idx)
                 chunks = extract_chunks(full_text)
-                show_proc(3, 68, chunks_so_far=len(chunks), images_so_far=img_idx)
+                show_proc(3, 68, chunks_n=len(chunks), images_n=img_idx)
                 embs = np.array(model.encode(chunks)).astype('float32')
-                show_proc(4, 88, chunks_so_far=len(chunks), images_so_far=img_idx)
+                show_proc(4, 88, chunks_n=len(chunks), images_n=img_idx)
                 index = faiss.IndexFlatL2(embs.shape[1]); index.add(embs)
-                show_proc(5, 100, chunks_so_far=len(chunks), images_so_far=img_idx)
+                show_proc(5, 100, chunks_n=len(chunks), images_n=img_idx)
                 time.sleep(0.6); proc_ph.empty()
                 t_done = time.time() - t_start
 
@@ -551,16 +592,14 @@ with st.sidebar:
                     "chunk_count":len(chunks),"image_store":image_store,"image_count":len(image_store),
                     "page_count":total,"process_time":t_done,"show_uploader":False,
                 })
-                st.success(f"✓ {len(chunks)} chunks · {len(image_store)} images · {fmt_time(t_done)}")
                 st.rerun()
     else:
         uploaded_file = None
-        # Show current doc name if indexed
         if "chunk_count" in st.session_state:
-            st.markdown(f"""
+            st.markdown("""
             <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,255,136,0.6);
               padding:5px 8px;border-left:2px solid rgba(0,255,136,0.3);margin-bottom:4px;">
-              ✓ Document indexed & ready</div>""", unsafe_allow_html=True)
+              ✓ Document indexed &amp; ready</div>""", unsafe_allow_html=True)
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
@@ -592,8 +631,8 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
-# Always inject the sidebar open button (visible when sidebar is closed)
-st.components.v1.html(SIDEBAR_OPEN_BTN, height=0, scrolling=False)
+# Inject red-ring killer first (height=0 so invisible)
+st.components.v1.html(RED_RING_KILLER, height=0, scrolling=False)
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
 
 if "index" not in st.session_state:
