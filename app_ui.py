@@ -38,6 +38,11 @@ def load_from_disk():
     with open(META_PATH,  "rb") as f: meta        = pickle.load(f)
     return index, chunks, image_store, meta
 
+def clear_disk():
+    for p in [FAISS_PATH, CHUNKS_PATH, IMAGES_PATH, META_PATH]:
+        try: os.remove(p)
+        except: pass
+
 st.set_page_config(page_title="PDF BOT", page_icon="⬡", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
@@ -53,13 +58,9 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;min-width:260px!important;}
 [data-testid="stSidebar"]>div{padding-top:0!important;}
 
-/* ── HIDE Streamlit's native sidebar toggle — we use our own JS button ── */
 [data-testid="stSidebarCollapseButton"],
 [data-testid="collapsedControl"]{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
+  display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
 }
 
 [data-testid="stFileUploader"]{background:rgba(0,10,30,0.6)!important;border:2px dashed rgba(0,200,255,0.45)!important;border-radius:12px!important;transition:all 0.3s!important;box-shadow:0 0 18px rgba(0,200,255,0.12),inset 0 0 18px rgba(0,200,255,0.04)!important;}
@@ -85,77 +86,18 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#002a40,#005580)!important;border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#1a0050,#4400cc)!important;border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;}
 
-/* ══════════════════════════════════════════════
-   CHAT INPUT — KILL RED BORDER COMPLETELY
-   The red comes from [data-baseweb="base-input"]
-   which Streamlit wraps around the textarea.
-   We nuke every possible source.
-══════════════════════════════════════════════ */
-[data-testid="stChatInput"]{
-  background:rgba(0,2,15,0.96)!important;
-  border-top:1px solid rgba(0,200,255,0.14)!important;
-  border:none!important;
-  padding:12px 20px!important;
-  outline:none!important;
-  box-shadow:none!important;
-}
-/* The outer div Streamlit injects */
-[data-testid="stChatInput"]>div{
-  border:none!important;
-  outline:none!important;
-  box-shadow:none!important;
-  background:transparent!important;
-}
-/* BaseWeb wrapper — this is what goes red */
-[data-testid="stChatInput"] [data-baseweb="base-input"],
-[data-testid="stChatInput"] [data-baseweb="textarea"],
-[data-testid="stChatInput"] [class*="InputContainer"],
-[data-testid="stChatInput"] [class*="BaseInput"]{
-  border:none!important;
-  outline:none!important;
-  box-shadow:none!important;
-  background:transparent!important;
-}
-/* The actual textarea pill */
-[data-testid="stChatInput"] textarea{
-  background:rgba(0,200,255,0.04)!important;
-  border:1.5px solid rgba(0,200,255,0.3)!important;
-  border-radius:26px!important;
-  color:#a8dcf8!important;
-  font-family:'Inter',sans-serif!important;
-  font-size:0.9rem!important;
-  padding:11px 20px!important;
-  outline:none!important;
-  box-shadow:none!important;
-  caret-color:#00dcff!important;
-}
-[data-testid="stChatInput"] textarea:focus,
-[data-testid="stChatInput"] textarea:focus-visible,
-[data-testid="stChatInput"] textarea:focus-within{
-  border:1.5px solid rgba(0,200,255,0.8)!important;
-  outline:none!important;
-  box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;
-  background:rgba(0,200,255,0.06)!important;
-}
+[data-testid="stChatInput"]{background:rgba(0,2,15,0.96)!important;border-top:1px solid rgba(0,200,255,0.14)!important;border:none!important;padding:12px 20px!important;outline:none!important;box-shadow:none!important;}
+[data-testid="stChatInput"]>div{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
+[data-testid="stChatInput"] [data-baseweb="base-input"],[data-testid="stChatInput"] [data-baseweb="textarea"],[data-testid="stChatInput"] [class*="InputContainer"],[data-testid="stChatInput"] [class*="BaseInput"]{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
+[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.3)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;box-shadow:none!important;caret-color:#00dcff!important;}
+[data-testid="stChatInput"] textarea:focus,[data-testid="stChatInput"] textarea:focus-visible,[data-testid="stChatInput"] textarea:focus-within{border:1.5px solid rgba(0,200,255,0.8)!important;outline:none!important;box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;background:rgba(0,200,255,0.06)!important;}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
 [data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
 [data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.3)!important;box-shadow:0 0 16px rgba(0,200,255,0.4)!important;}
-
-/* Nuclear option: kill ALL red/orange/default outlines sitewide */
-*:focus,*:focus-visible,*:focus-within{
-  outline:none!important;
-}
-/* BaseWeb uses internal state classes for the red ring — kill them all */
-[data-baseweb="base-input"]:focus-within,
-[data-baseweb="base-input"]:focus,
-[data-baseweb="textarea"]:focus-within{
-  border-color:transparent!important;
-  box-shadow:none!important;
-  outline:none!important;
-}
+*:focus,*:focus-visible,*:focus-within{outline:none!important;}
+[data-baseweb="base-input"]:focus-within,[data-baseweb="base-input"]:focus,[data-baseweb="textarea"]:focus-within{border-color:transparent!important;box-shadow:none!important;outline:none!important;}
 
 ::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.25);border-radius:2px;}
-
 .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
 .metric-card{background:rgba(0,200,255,0.03);border:1px solid rgba(0,200,255,0.1);border-radius:6px;padding:10px 8px;text-align:center;transition:all 0.3s;}
 .metric-card:hover{border-color:rgba(0,200,255,0.35);background:rgba(0,200,255,0.06);}
@@ -386,6 +328,31 @@ def find_matching_images(question, image_store):
     if "all" in q: return image_store[:5]
     return [image_store[0]]
 
+# ── FIX 2: Smart image matching — find images relevant to the query ───────────
+def find_relevant_images_for_context(question, context_chunks, image_store):
+    """
+    Instead of sending all images to Claude at index time,
+    we match images to the user's question by checking if
+    the image description text appears in the retrieved context chunks.
+    Returns images only when they're genuinely relevant.
+    """
+    if not image_store:
+        return []
+    q = question.lower()
+    relevant = []
+    for img in image_store:
+        desc = img.get("description", "").lower()
+        page = img.get("page", 0)
+        # Check if image description keywords overlap with the question
+        q_words = set(re.findall(r'\b\w{4,}\b', q))
+        d_words = set(re.findall(r'\b\w{4,}\b', desc))
+        overlap = q_words & d_words
+        # Also check if the image's page text appears in retrieved context
+        page_mentioned = f"page {page}" in context_chunks.lower() or f"image {img['index']+1}" in context_chunks.lower()
+        if len(overlap) >= 2 or page_mentioned:
+            relevant.append(img)
+    return relevant[:3]  # cap at 3
+
 @st.cache_resource
 def load_models():
     m  = SentenceTransformer('all-MiniLM-L6-v2')
@@ -395,8 +362,8 @@ def load_models():
 
 model, cross_encoder, anthropic_client = load_models()
 
-# ── AUTO-RESTORE from disk on first load ──────────────────────────────────────
-if "index" not in st.session_state:
+# ── FIX 1: Only auto-restore if user hasn't explicitly cleared ────────────────
+if "index" not in st.session_state and not st.session_state.get("cleared", False):
     saved = load_from_disk()
     if saved:
         idx, chunks, imgs, meta = saved
@@ -407,6 +374,7 @@ if "index" not in st.session_state:
             "page_count":  meta.get("page_count", 0),
             "process_time": meta.get("process_time", None),
             "messages": [], "chat_display": [],
+            "restored_from_disk": True,   # flag so we show a notice
         })
 
 def extract_chunks(text, chunk_size=500, overlap=100):
@@ -427,6 +395,25 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown('<span class="s-label">// Document</span>', unsafe_allow_html=True)
+
+    # ── FIX 1: Show restored-from-disk banner + Clear button ──
+    if st.session_state.get("restored_from_disk"):
+        st.markdown("""
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;
+          color:rgba(255,180,0,0.75);padding:5px 8px;margin-bottom:6px;
+          border-left:2px solid rgba(255,180,0,0.4);background:rgba(255,180,0,0.05);
+          border-radius:0 4px 4px 0;">
+          ⚠ Restored from previous session
+        </div>""", unsafe_allow_html=True)
+        if st.button("✕  CLEAR & START FRESH", key="clear_btn"):
+            clear_disk()
+            for k in ["index","chunks","image_store","image_count","chunk_count",
+                      "page_count","process_time","messages","chat_display",
+                      "restored_from_disk","show_uploader"]:
+                st.session_state.pop(k, None)
+            st.session_state["cleared"] = True
+            st.rerun()
+
     if "show_uploader" not in st.session_state:
         st.session_state.show_uploader = True
 
@@ -445,7 +432,7 @@ with st.sidebar:
             if st.button("⚡  PROCESS & INDEX"):
                 t_start = time.time()
                 proc_ph = st.empty()
-                STEPS = ["extracting text","analyzing images","chunking","embedding","building index","ready ✓"]
+                STEPS = ["extracting text","indexing images (metadata only)","chunking","embedding","building index","ready ✓"]
 
                 def show_proc(step, pct, chunks_n=0, images_n=0):
                     rows = ""
@@ -474,6 +461,8 @@ with st.sidebar:
                 doc = fitz.open(tmp_path)
                 full_text, total, image_store, img_idx = "", len(doc), [], 0
 
+                # ── FIX 2: Extract images WITHOUT calling Claude API ──
+                # Store raw b64 + page position. Claude only sees them when user asks.
                 show_proc(1, 15)
                 for pnum, page in enumerate(doc):
                     full_text += page.get_text()
@@ -482,21 +471,26 @@ with st.sidebar:
                             xref = img[0]; bi = doc.extract_image(xref)
                             b64 = base64.b64encode(bi["image"]).decode()
                             mt = "image/png" if bi["ext"] == "png" else "image/jpeg"
-                            resp = anthropic_client.messages.create(
-                                model="claude-haiku-4-5-20251001", max_tokens=300,
-                                messages=[{"role":"user","content":[
-                                    {"type":"image","source":{"type":"base64","media_type":mt,"data":b64}},
-                                    {"type":"text","text":"Describe this image concisely. If diagram/chart, explain what it shows."}
-                                ]}]
-                            )
-                            desc = resp.content[0].text
-                            image_store.append({"b64":b64,"media_type":mt,"page":pnum+1,"index":img_idx,"description":desc})
+                            # Lightweight placeholder description — no API call
+                            desc = f"Image on page {pnum+1} (visual content — ask to view)"
+                            image_store.append({
+                                "b64": b64, "media_type": mt,
+                                "page": pnum+1, "index": img_idx,
+                                "description": desc,
+                                "described": False,   # flag: not yet sent to Claude
+                            })
                             img_idx += 1
-                            full_text += f"\n[Image {img_idx} on page {pnum+1}]: {desc}\n"
+                            full_text += f"\n[Image {img_idx} on page {pnum+1}]\n"
                         except: continue
                     show_proc(1, 15+int((pnum+1)/total*30), images_n=img_idx)
 
                 doc.close(); os.unlink(tmp_path)
+
+                # ── FIX 3: Extract context from first 3 pages for tutor persona ──
+                doc2 = fitz.open(tmp_path) if False else None  # already closed
+                # We already have full_text; extract first ~1500 words as context
+                intro_words = " ".join(full_text.split()[:1500])
+
                 show_proc(2, 50, images_n=img_idx)
                 chunks = extract_chunks(full_text)
                 show_proc(3, 68, chunks_n=len(chunks), images_n=img_idx)
@@ -507,13 +501,16 @@ with st.sidebar:
                 time.sleep(0.4); proc_ph.empty()
                 t_done = time.time() - t_start
 
-                meta = {"page_count": total, "process_time": t_done}
+                meta = {"page_count": total, "process_time": t_done, "intro_context": intro_words}
                 save_to_disk(index, chunks, image_store, meta)
 
                 st.session_state.update({
-                    "index":index,"chunks":chunks,"messages":[],"chat_display":[],
-                    "chunk_count":len(chunks),"image_store":image_store,"image_count":len(image_store),
-                    "page_count":total,"process_time":t_done,"show_uploader":False,
+                    "index": index, "chunks": chunks, "messages": [], "chat_display": [],
+                    "chunk_count": len(chunks), "image_store": image_store,
+                    "image_count": len(image_store), "page_count": total,
+                    "process_time": t_done, "show_uploader": False,
+                    "intro_context": intro_words,
+                    "restored_from_disk": False,
                 })
                 st.rerun()
     else:
@@ -526,18 +523,22 @@ with st.sidebar:
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
-    cc = st.session_state.get("chunk_count",0)
-    ic = st.session_state.get("image_count",0)
-    pc = st.session_state.get("page_count",0)
-    pt = st.session_state.get("process_time",None)
+    # ── FIX 1: Show — instead of old numbers when session has no doc ──
+    this_session = not st.session_state.get("restored_from_disk", False)
+    cc = st.session_state.get("chunk_count", 0)
+    ic = st.session_state.get("image_count", 0)
+    pc = st.session_state.get("page_count",  0)
+    pt = st.session_state.get("process_time", None)
+    # Only show real numbers if indexed this session OR restored and not cleared
+    show_stats = "chunk_count" in st.session_state
     st.markdown('<span class="s-label">// Last Run</span>', unsafe_allow_html=True)
     st.markdown(f"""
     <div class="metric-grid">
-      <div class="metric-card"><div class="metric-val">{pc or '—'}</div><div class="metric-lbl">Pages</div></div>
-      <div class="metric-card"><div class="metric-val">{cc or '—'}</div><div class="metric-lbl">Chunks</div></div>
-      <div class="metric-card"><div class="metric-val">{ic or '—'}</div><div class="metric-lbl">Images</div></div>
-      <div class="metric-card"><div class="metric-val">{cc or '—'}</div><div class="metric-lbl">Vectors</div></div>
-      <div class="metric-card" style="grid-column:span 2"><div class="metric-val">{fmt_time(pt) if pt else '—'}</div><div class="metric-lbl">Process Time</div></div>
+      <div class="metric-card"><div class="metric-val">{pc if show_stats else '—'}</div><div class="metric-lbl">Pages</div></div>
+      <div class="metric-card"><div class="metric-val">{cc if show_stats else '—'}</div><div class="metric-lbl">Chunks</div></div>
+      <div class="metric-card"><div class="metric-val">{ic if show_stats else '—'}</div><div class="metric-lbl">Images</div></div>
+      <div class="metric-card"><div class="metric-val">{cc if show_stats else '—'}</div><div class="metric-lbl">Vectors</div></div>
+      <div class="metric-card" style="grid-column:span 2"><div class="metric-val">{fmt_time(pt) if (show_stats and pt) else '—'}</div><div class="metric-lbl">Process Time</div></div>
     </div>""", unsafe_allow_html=True)
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
@@ -598,96 +599,36 @@ with st.sidebar:
     </div>""", unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
-# Floating sidebar toggle button — injected via JS into the parent page.
-# Works on desktop AND mobile. Persists even when sidebar is fully collapsed.
 st.components.v1.html("""
 <script>
 (function(){
-  var STYLE_ID = 'sb-float-style';
-  var BTN_ID   = 'sb-float-btn';
-
-  function getDoc(){ return window.parent ? window.parent.document : document; }
-
+  var STYLE_ID='sb-float-style',BTN_ID='sb-float-btn';
+  function getDoc(){return window.parent?window.parent.document:document;}
   function ensureStyle(doc){
-    if(doc.getElementById(STYLE_ID)) return;
-    var s = doc.createElement('style');
-    s.id = STYLE_ID;
-    s.textContent = [
-      '@keyframes sbglow{0%,100%{box-shadow:0 0 14px rgba(0,200,255,.4),3px 0 10px rgba(0,200,255,.15)}',
-      '50%{box-shadow:0 0 30px rgba(0,200,255,.85),3px 0 20px rgba(0,200,255,.4)}}',
-      '#'+BTN_ID+'{',
-        'position:fixed!important;',
-        'left:0!important;top:50%!important;',
-        'transform:translateY(-50%)!important;',
-        'z-index:2147483647!important;',
-        'width:26px!important;height:60px!important;',
-        'background:rgba(0,8,24,0.95)!important;',
-        'border:1.5px solid rgba(0,200,255,0.65)!important;',
-        'border-left:none!important;',
-        'border-radius:0 10px 10px 0!important;',
-        'color:#00dcff!important;',
-        'font-size:14px!important;',
-        'cursor:pointer!important;',
-        'display:flex!important;align-items:center!important;justify-content:center!important;',
-        'animation:sbglow 2.2s ease-in-out infinite!important;',
-        'transition:background 0.2s!important;',
-        'outline:none!important;',
-        'padding:0!important;',
-      '}',
+    if(doc.getElementById(STYLE_ID))return;
+    var s=doc.createElement('style');s.id=STYLE_ID;
+    s.textContent=['@keyframes sbglow{0%,100%{box-shadow:0 0 14px rgba(0,200,255,.4),3px 0 10px rgba(0,200,255,.15)}50%{box-shadow:0 0 30px rgba(0,200,255,.85),3px 0 20px rgba(0,200,255,.4)}}',
+      '#'+BTN_ID+'{position:fixed!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;z-index:2147483647!important;width:26px!important;height:60px!important;background:rgba(0,8,24,0.95)!important;border:1.5px solid rgba(0,200,255,0.65)!important;border-left:none!important;border-radius:0 10px 10px 0!important;color:#00dcff!important;font-size:14px!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;animation:sbglow 2.2s ease-in-out infinite!important;outline:none!important;padding:0!important;}',
       '#'+BTN_ID+':hover{background:rgba(0,200,255,0.28)!important;}'
     ].join('');
     doc.head.appendChild(s);
   }
-
   function ensureButton(doc){
-    if(doc.getElementById(BTN_ID)) return;
-    var btn = doc.createElement('button');
-    btn.id = BTN_ID;
-    btn.title = 'Toggle Sidebar';
-    btn.innerHTML = '&#8942;'; // ⋮ vertical dots
-    btn.setAttribute('aria-label','Toggle sidebar');
-
-    btn.addEventListener('click', function(){
-      // Strategy 1: click Streamlit's native collapse/expand button
-      var targets = [
-        '[data-testid="stSidebarCollapseButton"] button',
-        '[data-testid="stSidebarCollapseButton"]',
-        '[data-testid="collapsedControl"] button',
-        '[data-testid="collapsedControl"]',
-      ];
-      for(var i=0;i<targets.length;i++){
-        var el = doc.querySelector(targets[i]);
-        if(el){ el.click(); return; }
-      }
-      // Strategy 2: toggle sidebar display directly
-      var sb = doc.querySelector('[data-testid="stSidebar"]');
-      if(sb){
-        sb.style.display = (sb.style.display === 'none') ? '' : 'none';
-      }
+    if(doc.getElementById(BTN_ID))return;
+    var btn=doc.createElement('button');btn.id=BTN_ID;btn.title='Toggle Sidebar';btn.innerHTML='&#8942;';
+    btn.addEventListener('click',function(){
+      var targets=['[data-testid="stSidebarCollapseButton"] button','[data-testid="stSidebarCollapseButton"]','[data-testid="collapsedControl"] button','[data-testid="collapsedControl"]'];
+      for(var i=0;i<targets.length;i++){var el=doc.querySelector(targets[i]);if(el){el.click();return;}}
+      var sb=doc.querySelector('[data-testid="stSidebar"]');
+      if(sb){sb.style.display=(sb.style.display==='none')?'':'none';}
     });
-
     doc.body.appendChild(btn);
   }
-
-  function init(){
-    var doc = getDoc();
-    ensureStyle(doc);
-    ensureButton(doc);
-  }
-
-  // Run immediately + after Streamlit rehydrates
-  init();
-  setTimeout(init, 600);
-  setTimeout(init, 1800);
-
-  // Watch for Streamlit re-renders that might remove the button
-  var doc = getDoc();
-  var observer = new MutationObserver(function(mutations){
-    if(!doc.getElementById(BTN_ID)) ensureButton(doc);
-  });
-  setTimeout(function(){
-    observer.observe(doc.body, {childList: true, subtree: false});
-  }, 800);
+  function init(){var doc=getDoc();ensureStyle(doc);ensureButton(doc);}
+  init();setTimeout(init,600);setTimeout(init,1800);
+  var doc=getDoc();
+  var observer=new MutationObserver(function(){if(!doc.getElementById(BTN_ID))ensureButton(doc);});
+  setTimeout(function(){observer.observe(doc.body,{childList:true,subtree:false});},800);
 })();
 </script>
 """, height=0, scrolling=False)
@@ -722,17 +663,13 @@ else:
             st.markdown(f'<span class="ts ts-right">✓ {now}</span>', unsafe_allow_html=True)
         st.session_state.chat_display.append({"role":"user","content":question,"images":[],"time":now})
 
-        images_to_show = find_matching_images(question, st.session_state.get("image_store",[])) if is_image_request(question) else []
-
         think_ph = st.empty()
         think_ph.markdown(THINKING_HTML, unsafe_allow_html=True)
 
-        # Step 1: broad FAISS recall (top-10)
+        # Retrieve + rerank
         q_emb = np.array([model.encode(question)]).astype('float32')
         _, idxs = st.session_state.index.search(q_emb, min(10, len(st.session_state.chunks)))
         candidate_chunks = [(int(i), st.session_state.chunks[int(i)]) for i in idxs[0]]
-
-        # Step 2: cross-encoder re-rank → keep top-3
         ce_scores = cross_encoder.predict([(question, ch) for _, ch in candidate_chunks])
         ranked    = sorted(zip(ce_scores, candidate_chunks), reverse=True)[:3]
         top_idxs  = [idx for _, (idx, _) in ranked]
@@ -742,13 +679,59 @@ else:
         time.sleep(0.3)
         think_ph.empty()
 
+        # ── FIX 2: Images — only fetch from Claude when user explicitly asks ──
+        images_to_show = []
+        if is_image_request(question):
+            # Explicit image request → find by ordinal/number
+            matched = find_matching_images(question, st.session_state.get("image_store", []))
+            if matched:
+                img = matched[0]
+                if not img.get("described"):
+                    # NOW call Claude Vision (only on demand)
+                    try:
+                        resp = anthropic_client.messages.create(
+                            model="claude-haiku-4-5-20251001", max_tokens=300,
+                            messages=[{"role":"user","content":[
+                                {"type":"image","source":{"type":"base64","media_type":img["media_type"],"data":img["b64"]}},
+                                {"type":"text","text":"Describe this image concisely. If it's a diagram or chart, explain what it shows."}
+                            ]}]
+                        )
+                        img["description"] = resp.content[0].text
+                        img["described"] = True
+                    except: pass
+                images_to_show = matched
+
+        # ── FIX 3: Build expert-tutor system prompt using intro context ──────
+        intro = st.session_state.get("intro_context", "")
+        if not intro:
+            # fallback: grab from disk meta
+            try:
+                with open(META_PATH,"rb") as f:
+                    m = pickle.load(f)
+                    intro = m.get("intro_context","")
+            except: pass
+
         if images_to_show:
-            st.session_state.messages.append({"role":"user","content":f"Context:\n{context}\n\nQuestion: {question}\n\nNote: You are showing the user the image(s). Describe in 1-2 sentences."})
+            st.session_state.messages.append({"role":"user","content":
+                f"Context:\n{context}\n\nQuestion: {question}\n\nNote: You are showing the user the image(s). Describe in 1-2 sentences."})
             system_prompt = "You are a document assistant. Briefly describe what the image shows in 1-2 sentences."
-            max_tok = 250
+            max_tok = 300
         else:
             st.session_state.messages.append({"role":"user","content":f"Context:\n{context}\n\nQuestion: {question}"})
-            system_prompt = "You are an expert document analyst. Answer clearly and thoroughly. Use bullet points for lists. Bold **key terms**. Cite page numbers when known. If something isn't in the context, say so rather than guessing."
+            # Expert tutor system prompt — grounded in the document's own intro
+            system_prompt = f"""You are an expert tutor and analyst specialised in the content of this document.
+
+Here is an excerpt from the beginning of the document to understand its subject:
+---
+{intro[:1200]}
+---
+
+Based on this subject matter, act as a knowledgeable expert in this field. When answering:
+- Explain concepts clearly as a tutor would, building understanding step by step
+- Use bullet points for lists and **bold** key terms
+- Cite page numbers or sections when the context makes them clear
+- If the answer isn't in the retrieved context, say so honestly rather than guessing
+- Connect ideas to the broader subject when helpful"""
             max_tok = 2048
 
         response = anthropic_client.messages.create(
