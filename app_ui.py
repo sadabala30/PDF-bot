@@ -1,6 +1,6 @@
 import streamlit as st
 import anthropic
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, CrossEncoder
 import fitz
 import tempfile
 import os
@@ -9,10 +9,34 @@ import numpy as np
 import faiss
 import time
 import re
+import pickle
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# ── PERSISTENT STORAGE ────────────────────────────────────────────────────────
+STORE_DIR  = os.path.join(os.path.expanduser("~"), ".pdfbot_store")
+os.makedirs(STORE_DIR, exist_ok=True)
+FAISS_PATH  = os.path.join(STORE_DIR, "index.faiss")
+CHUNKS_PATH = os.path.join(STORE_DIR, "chunks.pkl")
+IMAGES_PATH = os.path.join(STORE_DIR, "images.pkl")
+META_PATH   = os.path.join(STORE_DIR, "meta.pkl")
+
+def save_to_disk(index, chunks, image_store, meta):
+    faiss.write_index(index, FAISS_PATH)
+    with open(CHUNKS_PATH, "wb") as f: pickle.dump(chunks, f)
+    with open(IMAGES_PATH, "wb") as f: pickle.dump(image_store, f)
+    with open(META_PATH,   "wb") as f: pickle.dump(meta, f)
+
+def load_from_disk():
+    if not all(os.path.exists(p) for p in [FAISS_PATH,CHUNKS_PATH,IMAGES_PATH,META_PATH]):
+        return None
+    index = faiss.read_index(FAISS_PATH)
+    with open(CHUNKS_PATH,"rb") as f: chunks      = pickle.load(f)
+    with open(IMAGES_PATH,"rb") as f: image_store = pickle.load(f)
+    with open(META_PATH,  "rb") as f: meta        = pickle.load(f)
+    return index, chunks, image_store, meta
 
 st.set_page_config(page_title="PDF BOT", page_icon="⬡", layout="wide", initial_sidebar_state="expanded")
 
@@ -388,11 +412,26 @@ def find_matching_images(question, image_store):
 
 @st.cache_resource
 def load_models():
-    m = SentenceTransformer('all-MiniLM-L6-v2')
-    c = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    return m, c
+    m  = SentenceTransformer('all-MiniLM-L6-v2')
+    ce = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+    c  = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    return m, ce, c
 
-model, anthropic_client = load_models()
+model, cross_encoder, anthropic_client = load_models()
+
+# ── AUTO-RESTORE from disk on first load ──────────────────────────────────────
+if "index" not in st.session_state:
+    saved = load_from_disk()
+    if saved:
+        idx, chunks, imgs, meta = saved
+        st.session_state.update({
+            "index": idx, "chunks": chunks,
+            "image_store": imgs, "image_count": len(imgs),
+            "chunk_count": len(chunks),
+            "page_count":  meta.get("page_count", 0),
+            "process_time": meta.get("process_time", None),
+            "messages": [], "chat_display": [],
+        })
 
 def extract_chunks(text, chunk_size=500, overlap=100):
     words = text.split()
@@ -491,6 +530,9 @@ with st.sidebar:
                 show_proc(5, 100, chunks_n=len(chunks), images_n=img_idx)
                 time.sleep(0.4); proc_ph.empty()
                 t_done = time.time() - t_start
+
+                meta = {"page_count": total, "process_time": t_done}
+                save_to_disk(index, chunks, image_store, meta)
 
                 st.session_state.update({
                     "index":index,"chunks":chunks,"messages":[],"chat_display":[],
@@ -709,11 +751,18 @@ else:
         think_ph = st.empty()
         think_ph.markdown(THINKING_HTML, unsafe_allow_html=True)
 
+        # Step 1: broad FAISS recall (top-10)
         q_emb = np.array([model.encode(question)]).astype('float32')
-        _, idxs = st.session_state.index.search(q_emb, 3)
-        context = "\n\n".join(st.session_state.chunks[i] for i in idxs[0])
+        _, idxs = st.session_state.index.search(q_emb, min(10, len(st.session_state.chunks)))
+        candidate_chunks = [(int(i), st.session_state.chunks[int(i)]) for i in idxs[0]]
 
-        think_ph.markdown(retrieval_html([int(i)+1 for i in idxs[0]]), unsafe_allow_html=True)
+        # Step 2: cross-encoder re-rank → keep top-3
+        ce_scores = cross_encoder.predict([(question, ch) for _, ch in candidate_chunks])
+        ranked    = sorted(zip(ce_scores, candidate_chunks), reverse=True)[:3]
+        top_idxs  = [idx for _, (idx, _) in ranked]
+        context   = "\n\n".join(ch for _, (_, ch) in ranked)
+
+        think_ph.markdown(retrieval_html([i+1 for i in top_idxs]), unsafe_allow_html=True)
         time.sleep(0.3)
         think_ph.empty()
 
@@ -723,11 +772,11 @@ else:
             max_tok = 250
         else:
             st.session_state.messages.append({"role":"user","content":f"Context:\n{context}\n\nQuestion: {question}"})
-            system_prompt = "You are an intelligent document assistant. Answer clearly. Use bullet points for lists. Bold key terms using **term**. If not in context, look for related concepts."
-            max_tok = 1024
+            system_prompt = "You are an expert document analyst. Answer clearly and thoroughly. Use bullet points for lists. Bold **key terms**. Cite page numbers when known. If something isn't in the context, say so rather than guessing."
+            max_tok = 2048
 
         response = anthropic_client.messages.create(
-            model="claude-haiku-4-5-20251001", max_tokens=max_tok,
+            model="claude-sonnet-4-6", max_tokens=max_tok,
             system=system_prompt, messages=st.session_state.messages
         )
         reply = response.content[0].text
