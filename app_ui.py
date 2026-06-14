@@ -20,58 +20,23 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-
-/* ── HIDE ALL STREAMLIT CHROME & TOASTS ── */
 #MainMenu,footer,header,[data-testid="stToolbar"],.stDeployButton,
-[data-testid="stNotificationActionButton"],
-[data-testid="toastContainer"],
-.stToast, [class*="toast"], [class*="Toast"],
-div[aria-live="polite"]:not([data-testid="stChatInput"]),
-[data-baseweb="notification"],[data-baseweb="toast"]{
-  display:none!important;visibility:hidden!important;pointer-events:none!important;
-}
+[data-testid="stNotificationActionButton"],[data-testid="toastContainer"],
+.stToast,[class*="toast"],[class*="Toast"],
+[data-baseweb="notification"],[data-baseweb="toast"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+
+/* HIDE SIDEBAR COLLAPSE BUTTON COMPLETELY */
+[data-testid="stSidebarCollapseButton"]{display:none!important;visibility:hidden!important;}
 
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
-[data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;}
+[data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;min-width:260px!important;}
 [data-testid="stSidebar"]>div{padding-top:0!important;}
 
-/* ── SIDEBAR COLLAPSE BUTTON — always glowing, always visible ── */
-[data-testid="stSidebarCollapseButton"]{
-  position:fixed!important;top:50%!important;left:0!important;
-  transform:translateY(-50%)!important;z-index:99999!important;
-  background:rgba(0,200,255,0.1)!important;
-  border:1px solid rgba(0,200,255,0.55)!important;border-left:none!important;
-  border-radius:0 10px 10px 0!important;
-  width:20px!important;height:56px!important;
-  display:flex!important;align-items:center!important;justify-content:center!important;
-  animation:tabpulse 2.5s ease-in-out infinite!important;
-}
-[data-testid="stSidebarCollapseButton"]:hover{background:rgba(0,200,255,0.28)!important;box-shadow:4px 0 24px rgba(0,200,255,0.55)!important;}
-[data-testid="stSidebarCollapseButton"] svg{color:#00dcff!important;width:10px!important;height:10px!important;}
-@keyframes tabpulse{0%,100%{box-shadow:3px 0 10px rgba(0,200,255,0.2);}50%{box-shadow:3px 0 24px rgba(0,200,255,0.55);}}
-
-/* ── FILE UPLOADER — fancy dashed glow like the screenshot ── */
-[data-testid="stFileUploader"]{
-  background:rgba(0,10,30,0.6)!important;
-  border:2px dashed rgba(0,200,255,0.45)!important;
-  border-radius:12px!important;
-  position:relative!important;
-  transition:all 0.3s!important;
-  box-shadow:0 0 18px rgba(0,200,255,0.12),inset 0 0 18px rgba(0,200,255,0.04)!important;
-}
-[data-testid="stFileUploader"]:hover{
-  border-color:rgba(0,200,255,0.85)!important;
-  box-shadow:0 0 32px rgba(0,200,255,0.28),inset 0 0 24px rgba(0,200,255,0.08)!important;
-}
+[data-testid="stFileUploader"]{background:rgba(0,10,30,0.6)!important;border:2px dashed rgba(0,200,255,0.45)!important;border-radius:12px!important;transition:all 0.3s!important;box-shadow:0 0 18px rgba(0,200,255,0.12),inset 0 0 18px rgba(0,200,255,0.04)!important;}
+[data-testid="stFileUploader"]:hover{border-color:rgba(0,200,255,0.85)!important;box-shadow:0 0 32px rgba(0,200,255,0.28),inset 0 0 24px rgba(0,200,255,0.08)!important;}
 [data-testid="stFileUploader"] label{color:rgba(0,200,255,0.7)!important;font-family:'Share Tech Mono',monospace!important;font-size:0.72rem!important;}
 [data-testid="stFileUploader"] section{border:none!important;background:transparent!important;}
-[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzoneInstructions"]{color:rgba(0,200,255,0.5)!important;font-family:'Share Tech Mono',monospace!important;}
-[data-testid="stFileUploader"] small{color:rgba(0,200,255,0.3)!important;font-family:'Share Tech Mono',monospace!important;}
-[data-testid="stFileUploader"] button{
-  border:1px solid rgba(0,200,255,0.4)!important;color:#00dcff!important;
-  background:rgba(0,200,255,0.06)!important;border-radius:6px!important;
-  font-family:'Share Tech Mono',monospace!important;font-size:0.65rem!important;
-}
+[data-testid="stFileUploader"] button{border:1px solid rgba(0,200,255,0.4)!important;color:#00dcff!important;background:rgba(0,200,255,0.06)!important;border-radius:6px!important;font-family:'Share Tech Mono',monospace!important;font-size:0.65rem!important;}
 [data-testid="stFileUploader"] svg{color:rgba(0,200,255,0.4)!important;}
 
 .stButton>button{background:transparent!important;border:1px solid rgba(0,200,255,0.4)!important;color:#00dcff!important;border-radius:6px!important;font-family:'Share Tech Mono',monospace!important;font-size:0.7rem!important;letter-spacing:0.1em!important;width:100%!important;padding:9px!important;text-transform:uppercase!important;transition:all 0.25s!important;animation:pulsebtn 2.2s ease-in-out infinite!important;}
@@ -83,56 +48,22 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 .stSuccess{background:rgba(0,255,136,0.06)!important;border:1px solid rgba(0,255,136,0.2)!important;border-radius:6px!important;color:#00ff88!important;font-family:'Share Tech Mono',monospace!important;font-size:0.75rem!important;}
 .block-container{padding:0!important;max-width:100%!important;}
 
-/* ── WHATSAPP-STYLE CHAT ── */
 [data-testid="stChatMessage"]{background:transparent!important;border:none!important;padding:3px 20px!important;margin-bottom:4px!important;}
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"])>div:last-child{
-  background:rgba(0,18,38,0.92)!important;border:1px solid rgba(0,200,255,0.18)!important;
-  border-radius:2px 18px 18px 18px!important;padding:13px 17px!important;
-  font-size:0.88rem!important;line-height:1.75!important;color:#cce8ff!important;max-width:65%!important;
-}
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"])>div:last-child{
-  background:linear-gradient(135deg,rgba(0,100,200,0.4),rgba(60,0,180,0.45))!important;
-  border:1px solid rgba(80,160,255,0.35)!important;
-  border-radius:18px 2px 18px 18px!important;padding:13px 17px!important;
-  font-size:0.88rem!important;line-height:1.75!important;color:#e8f6ff!important;max-width:65%!important;
-}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"])>div:last-child{background:rgba(0,18,38,0.92)!important;border:1px solid rgba(0,200,255,0.18)!important;border-radius:2px 18px 18px 18px!important;padding:13px 17px!important;font-size:0.88rem!important;line-height:1.75!important;color:#cce8ff!important;max-width:65%!important;}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"])>div:last-child{background:linear-gradient(135deg,rgba(0,100,200,0.4),rgba(60,0,180,0.45))!important;border:1px solid rgba(80,160,255,0.35)!important;border-radius:18px 2px 18px 18px!important;padding:13px 17px!important;font-size:0.88rem!important;line-height:1.75!important;color:#e8f6ff!important;max-width:65%!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]){flex-direction:row-reverse!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#002a40,#005580)!important;border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#1a0050,#4400cc)!important;border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;}
 
-/* ── CHAT INPUT — KILL THE RED RING COMPLETELY ── */
 [data-testid="stChatInput"]{background:rgba(0,2,15,0.96)!important;border-top:1px solid rgba(0,200,255,0.14)!important;padding:12px 20px!important;}
-[data-testid="stChatInput"] textarea{
-  background:rgba(0,200,255,0.04)!important;
-  border:1.5px solid rgba(0,200,255,0.3)!important;
-  border-radius:26px!important;color:#a8dcf8!important;
-  font-family:'Inter',sans-serif!important;font-size:0.9rem!important;
-  padding:11px 20px!important;
-  outline:none!important;box-shadow:none!important;
-}
-[data-testid="stChatInput"] textarea:focus,
-[data-testid="stChatInput"] textarea:focus-within,
-[data-testid="stChatInput"] textarea:focus-visible{
-  border-color:rgba(0,200,255,0.9)!important;
-  box-shadow:0 0 0 2px rgba(0,200,255,0.18),0 0 28px rgba(0,200,255,0.22)!important;
-  outline:none!important;
-}
-/* The outer wrapper that Streamlit gives a red ring */
-[data-testid="stChatInput"]>div,[data-testid="stChatInput"]>div>div{
-  outline:none!important;box-shadow:none!important;border-color:transparent!important;
-}
+[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.3)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;box-shadow:none!important;}
+[data-testid="stChatInput"] textarea:focus{border-color:rgba(0,200,255,0.9)!important;box-shadow:0 0 0 2px rgba(0,200,255,0.18),0 0 28px rgba(0,200,255,0.22)!important;outline:none!important;}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
-[data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;transition:all 0.2s!important;}
-[data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.32)!important;box-shadow:0 0 16px rgba(0,200,255,0.4)!important;}
-
-/* Nuclear: kill every red/default focus ring */
+[data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
 *:focus{outline:none!important;}
-*:focus-visible{outline:none!important;}
-*[class*="focused"]{box-shadow:none!important;}
 
 ::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.25);border-radius:2px;}
 
-/* ── SIDEBAR UTILS ── */
 .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
 .metric-card{background:rgba(0,200,255,0.03);border:1px solid rgba(0,200,255,0.1);border-radius:6px;padding:10px 8px;text-align:center;transition:all 0.3s;}
 .metric-card:hover{border-color:rgba(0,200,255,0.35);background:rgba(0,200,255,0.06);}
@@ -157,50 +88,9 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 .rc-line{animation:rcfade 0.4s ease forwards;opacity:0;font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.4);line-height:1.9;}
 .rc-line:nth-child(2){animation-delay:.15s}.rc-line:nth-child(3){animation-delay:.3s}
 @keyframes rcfade{to{opacity:1}}
-.sug-bar{display:flex;gap:7px;align-items:center;padding:7px 20px;border-bottom:1px solid rgba(0,200,255,0.07);background:rgba(0,2,14,0.85);overflow-x:auto;flex-wrap:nowrap;}
-.sug-prefix{font-family:'Share Tech Mono',monospace;font-size:0.5rem;color:rgba(0,200,255,0.3);letter-spacing:.14em;white-space:nowrap;}
-.sug-tag{font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.5);border:1px solid rgba(0,200,255,0.2);padding:4px 12px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:all 0.2s;background:rgba(0,200,255,0.03);}
-.sug-tag:hover{color:#00dcff;border-color:rgba(0,200,255,0.7);background:rgba(0,200,255,0.1);box-shadow:0 0 10px rgba(0,200,255,0.2);}
 </style>
 """, unsafe_allow_html=True)
 
-# ── RED RING KILLER — MutationObserver runs in actual DOM ─────────────────────
-RED_RING_KILLER = """
-<script>
-(function(){
-  var BLUE = '0 0 0 2px rgba(0,200,255,0.2), 0 0 28px rgba(0,200,255,0.22)';
-  var RED_RE = /rgb\(255[\s,]+\d+[\s,]+\d+\)|rgba\(255[\s,]+\d+[\s,]+\d+/i;
-  function fixAll(){
-    document.querySelectorAll('*').forEach(function(el){
-      var cs = window.getComputedStyle(el);
-      var bs = cs.boxShadow || '';
-      var oc = cs.outlineColor || '';
-      if(RED_RE.test(bs)||RED_RE.test(oc)){
-        el.style.setProperty('box-shadow','none','important');
-        el.style.setProperty('outline','none','important');
-      }
-    });
-    // specifically fix chat input wrapper
-    var wrap = document.querySelector('[data-testid="stChatInput"]');
-    if(wrap){
-      wrap.style.setProperty('box-shadow','none','important');
-      wrap.style.setProperty('outline','none','important');
-      [].forEach.call(wrap.querySelectorAll('*'),function(c){
-        c.style.removeProperty('box-shadow');
-        c.style.removeProperty('outline');
-      });
-    }
-  }
-  var obs = new MutationObserver(fixAll);
-  obs.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['style','class']});
-  document.addEventListener('focusin', fixAll);
-  document.addEventListener('focusout', fixAll);
-  setInterval(fixAll, 400);
-})();
-</script>
-"""
-
-# ── HERO ──────────────────────────────────────────────────────────────────────
 HERO_HTML = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
@@ -337,7 +227,6 @@ EMPTY_STATE_HTML = """
 </script>
 """
 
-# ── SUGGESTION BAR with working inject ───────────────────────────────────────
 CHAT_BANNER_HTML = """
 <style>
 body{margin:0;background:rgba(0,2,14,0.85);}
@@ -358,18 +247,17 @@ body{margin:0;background:rgba(0,2,14,0.85);}
 </div>
 <script>
 function inject(el){
-  var text = el.textContent.trim();
-  var pdoc = window.parent.document;
-  var ta = pdoc.querySelector('[data-testid="stChatInput"] textarea');
-  if(!ta){ ta = pdoc.querySelector('textarea'); }
-  if(!ta){ return; }
-  // React native input setter trick
-  var nativeSetter = Object.getOwnPropertyDescriptor(window.parent.HTMLTextAreaElement.prototype,'value').set;
-  nativeSetter.call(ta, text);
+  var text=el.textContent.trim();
+  var pdoc=window.parent.document;
+  var ta=pdoc.querySelector('[data-testid="stChatInput"] textarea');
+  if(!ta){ta=pdoc.querySelector('textarea');}
+  if(!ta){return;}
+  var nativeSetter=Object.getOwnPropertyDescriptor(window.parent.HTMLTextAreaElement.prototype,'value').set;
+  nativeSetter.call(ta,text);
   ta.dispatchEvent(new window.parent.Event('input',{bubbles:true}));
   ta.dispatchEvent(new window.parent.Event('change',{bubbles:true}));
   ta.focus();
-  ta.setSelectionRange(text.length, text.length);
+  ta.setSelectionRange(text.length,text.length);
 }
 </script>
 """
@@ -403,7 +291,7 @@ def find_matching_images(question, image_store):
         idx = int(n)-1
         if 0 <= idx < len(image_store): return [image_store[idx]]
     if "last" in q: return [image_store[-1]]
-    if "all"  in q: return image_store[:5]
+    if "all" in q: return image_store[:5]
     return [image_store[0]]
 
 @st.cache_resource
@@ -431,72 +319,12 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── BUILT BY with clickable dropdowns ──
-    st.markdown("""
-    <span class="s-label">// Built by</span>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:rgba(0,200,255,0.65);margin-bottom:8px;">Sai Jyothi Gayathri Adabala</div>
-
-    <style>
-    .cb-row{display:flex;gap:6px;margin-bottom:4px;}
-    .cb-btn{
-      flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
-      padding:7px 6px;border:1px solid rgba(0,200,255,0.2);border-radius:7px;
-      font-family:'Share Tech Mono',monospace;font-size:.55rem;
-      color:rgba(0,200,255,0.55);cursor:pointer;
-      background:rgba(0,200,255,0.03);transition:all .2s;user-select:none;
-    }
-    .cb-btn:hover{border-color:rgba(0,200,255,0.6);color:#00dcff;background:rgba(0,200,255,0.08);box-shadow:0 0 12px rgba(0,200,255,0.15);}
-    .cb-dropdown{
-      display:none;margin-top:3px;margin-bottom:4px;
-      background:rgba(0,10,28,0.95);border:1px solid rgba(0,200,255,0.2);
-      border-radius:7px;padding:8px 12px;
-      font-family:'Share Tech Mono',monospace;font-size:0.6rem;
-      color:rgba(0,200,255,0.6);letter-spacing:.04em;
-      animation:dropIn 0.2s ease;
-    }
-    .cb-dropdown a{color:#00dcff;text-decoration:none;}
-    .cb-dropdown a:hover{text-decoration:underline;}
-    @keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-    </style>
-
-    <div class="cb-row">
-      <div class="cb-btn" onclick="toggleDrop('email-drop')">✉ email</div>
-      <div class="cb-btn" onclick="toggleDrop('li-drop')">in linkedin</div>
-    </div>
-    <div id="email-drop" class="cb-dropdown">
-      ✉ <a href="mailto:asjyothig@gmail.com">asjyothig@gmail.com</a>
-      <span onclick="copyText('asjyothig@gmail.com',this)"
-        style="float:right;cursor:pointer;color:rgba(0,200,255,0.4);font-size:0.5rem;">copy</span>
-    </div>
-    <div id="li-drop" class="cb-dropdown">
-      <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank">
-        linkedin.com/in/sai-jyothi-gayathri-adabala
-      </a>
-    </div>
-    <script>
-    function toggleDrop(id){
-      var el=document.getElementById(id);
-      var other=id==='email-drop'?'li-drop':'email-drop';
-      document.getElementById(other).style.display='none';
-      el.style.display=el.style.display==='block'?'none':'block';
-    }
-    function copyText(txt,btn){
-      navigator.clipboard.writeText(txt).then(function(){
-        var old=btn.textContent;btn.textContent='✓ done!';
-        setTimeout(function(){btn.textContent=old;},1500);
-      });
-    }
-    </script>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
-
-    # ── Upload toggle ──
+    # ── UPLOAD ──
     st.markdown('<span class="s-label">// Document</span>', unsafe_allow_html=True)
     if "show_uploader" not in st.session_state:
         st.session_state.show_uploader = True
 
-    btn_label = "📂  CHANGE PDF" if not st.session_state.show_uploader else "📂  UPLOAD / CHANGE PDF"
+    btn_label = "📂  UPLOAD / CHANGE PDF"
     if st.button(btn_label, key="toggle_upload"):
         st.session_state.show_uploader = not st.session_state.show_uploader
         st.rerun()
@@ -512,40 +340,27 @@ with st.sidebar:
             if st.button("⚡  PROCESS & INDEX"):
                 t_start = time.time()
                 proc_ph = st.empty()
-                STEPS = ["extracting text + OCR","analyzing images","chunking document","generating embeddings","building FAISS index","ready for queries"]
+                STEPS = ["extracting text","analyzing images","chunking","embedding","building index","ready ✓"]
 
                 def show_proc(step, pct, chunks_n=0, images_n=0):
                     rows = ""
                     for i, lbl in enumerate(STEPS):
-                        col  = "rgba(0,255,136,0.85)" if i < step else ("rgba(0,200,255,0.95)" if i == step else "rgba(0,200,255,0.18)")
-                        ind  = "✓" if i < step else ("●" if i == step else "○")
-                        rows += (f'<div style="font-family:Share Tech Mono,monospace;font-size:0.62rem;'
-                                 f'color:{col};padding:3px 0;letter-spacing:.05em;">'
-                                 f'<span>{ind}</span> &gt; {lbl}</div>')
+                        col = "rgba(0,255,136,0.85)" if i < step else ("rgba(0,200,255,0.95)" if i == step else "rgba(0,200,255,0.18)")
+                        ind = "✓" if i < step else ("●" if i == step else "○")
+                        rows += f'<div style="font-family:Share Tech Mono,monospace;font-size:0.62rem;color:{col};padding:3px 0;letter-spacing:.05em;">{ind} &gt; {lbl}</div>'
                     stats = ""
                     if chunks_n > 0:
-                        stats = (f'<div style="display:flex;gap:24px;margin-top:12px;padding-top:10px;'
-                                 f'border-top:1px solid rgba(0,200,255,0.1);">'
-                                 f'<div style="text-align:center;">'
-                                 f'<div style="font-family:Orbitron,monospace;font-size:1.1rem;font-weight:700;color:#00dcff;">{chunks_n}</div>'
+                        stats = (f'<div style="display:flex;gap:24px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,200,255,0.1);">'
+                                 f'<div style="text-align:center;"><div style="font-family:Orbitron,monospace;font-size:1.1rem;font-weight:700;color:#00dcff;">{chunks_n}</div>'
                                  f'<div style="font-family:Share Tech Mono,monospace;font-size:0.48rem;color:rgba(0,200,255,0.35);letter-spacing:.1em;">chunks</div></div>'
-                                 f'<div style="text-align:center;">'
-                                 f'<div style="font-family:Orbitron,monospace;font-size:1.1rem;font-weight:700;color:#00ff88;">{images_n}</div>'
+                                 f'<div style="text-align:center;"><div style="font-family:Orbitron,monospace;font-size:1.1rem;font-weight:700;color:#00ff88;">{images_n}</div>'
                                  f'<div style="font-family:Share Tech Mono,monospace;font-size:0.48rem;color:rgba(0,200,255,0.35);letter-spacing:.1em;">images</div></div></div>')
-                    html = (f'<div style="background:rgba(0,6,22,0.97);border:1px solid rgba(0,200,255,0.22);'
-                            f'border-radius:14px;padding:18px 18px 14px;">'
-                            f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
-                            f'<div style="width:26px;height:26px;border:1px solid rgba(0,200,255,0.35);border-radius:6px;'
-                            f'display:flex;align-items:center;justify-content:center;font-family:Orbitron,monospace;'
-                            f'font-size:0.55rem;color:rgba(0,200,255,0.6);">⬡</div>'
-                            f'<div><div style="font-family:Orbitron,monospace;font-size:0.7rem;color:#00dcff;'
-                            f'letter-spacing:.08em;font-weight:700;">{STEPS[min(step,len(STEPS)-1)].upper()}</div>'
-                            f'<div style="font-family:Share Tech Mono,monospace;font-size:0.46rem;'
-                            f'color:rgba(0,200,255,0.3);margin-top:1px;">{uploaded_file.name}</div></div></div>'
-                            f'<div style="background:rgba(0,200,255,0.06);border-radius:2px;height:2px;margin-bottom:12px;overflow:hidden;">'
-                            f'<div style="height:2px;background:linear-gradient(90deg,#00dcff,#00ff88);width:{pct}%;transition:width 0.5s ease;"></div></div>'
-                            f'{rows}{stats}</div>')
-                    proc_ph.markdown(html, unsafe_allow_html=True)
+                    proc_ph.markdown(
+                        f'<div style="background:rgba(0,6,22,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:14px;padding:16px 18px;">'
+                        f'<div style="font-family:Orbitron,monospace;font-size:0.68rem;color:#00dcff;letter-spacing:.08em;margin-bottom:10px;">⬡ PROCESSING</div>'
+                        f'<div style="background:rgba(0,200,255,0.06);border-radius:2px;height:2px;margin-bottom:10px;overflow:hidden;">'
+                        f'<div style="height:2px;background:linear-gradient(90deg,#00dcff,#00ff88);width:{pct}%;transition:width 0.5s;"></div></div>'
+                        f'{rows}{stats}</div>', unsafe_allow_html=True)
 
                 show_proc(0, 5)
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
@@ -584,7 +399,7 @@ with st.sidebar:
                 show_proc(4, 88, chunks_n=len(chunks), images_n=img_idx)
                 index = faiss.IndexFlatL2(embs.shape[1]); index.add(embs)
                 show_proc(5, 100, chunks_n=len(chunks), images_n=img_idx)
-                time.sleep(0.6); proc_ph.empty()
+                time.sleep(0.4); proc_ph.empty()
                 t_done = time.time() - t_start
 
                 st.session_state.update({
@@ -603,6 +418,7 @@ with st.sidebar:
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
+    # metrics
     cc = st.session_state.get("chunk_count",0)
     ic = st.session_state.get("image_count",0)
     pc = st.session_state.get("page_count",0)
@@ -618,6 +434,7 @@ with st.sidebar:
     </div>""", unsafe_allow_html=True)
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
+
     st.markdown("""
     <span class="s-label">// Tips</span>
     <div class="sys-tips">
@@ -627,12 +444,74 @@ with st.sidebar:
       › reference page numbers<br>
       › request summaries
     </div>
-    <div style="margin-top:14px;font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">CLAUDE · FAISS · SENTENCE-TRANSFORMERS</div>
+    """, unsafe_allow_html=True)
+
+    # ── BUILT BY — always at bottom ──
+    st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+    .cb-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:.18em;color:rgba(0,200,255,0.28);text-transform:uppercase;margin-bottom:6px;display:block;}
+    .cb-name{font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:rgba(0,200,255,0.6);margin-bottom:10px;}
+    .cb-row{display:flex;gap:6px;margin-bottom:0;}
+    .cb-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 6px;border:1px solid rgba(0,200,255,0.2);border-radius:7px;font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(0,200,255,0.55);cursor:pointer;background:rgba(0,200,255,0.03);transition:all .2s;user-select:none;}
+    .cb-btn:hover{border-color:rgba(0,200,255,0.6);color:#00dcff;background:rgba(0,200,255,0.08);box-shadow:0 0 12px rgba(0,200,255,0.15);}
+    .cb-dropdown{display:none;margin-top:4px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:8px;padding:10px 14px;font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.6);animation:dropIn 0.2s ease;position:relative;z-index:100;}
+    .cb-dropdown a{color:#00dcff;text-decoration:none;word-break:break-all;}
+    .cb-dropdown a:hover{text-decoration:underline;}
+    .cb-copy-btn{float:right;cursor:pointer;color:rgba(0,200,255,0.4);font-size:0.5rem;border:1px solid rgba(0,200,255,0.2);padding:1px 6px;border-radius:4px;transition:all .2s;}
+    .cb-copy-btn:hover{color:#00dcff;border-color:rgba(0,200,255,0.6);}
+    @keyframes dropIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+    .cb-footer{margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;}
+    </style>
+
+    <span class="cb-label">// Built by</span>
+    <div class="cb-name">Sai Jyothi Gayathri Adabala</div>
+    <div class="cb-row">
+      <div class="cb-btn" id="email-btn" onclick="toggleDrop('email-drop','li-drop')">✉ email</div>
+      <div class="cb-btn" id="li-btn" onclick="toggleDrop('li-drop','email-drop')">in linkedin</div>
+    </div>
+
+    <div id="email-drop" class="cb-dropdown">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <span>asjyothig@gmail.com</span>
+        <span class="cb-copy-btn" onclick="copyEmail(this)">copy</span>
+      </div>
+    </div>
+
+    <div id="li-drop" class="cb-dropdown">
+      <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank">
+        → linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b
+      </a>
+    </div>
+
+    <div class="cb-footer">CLAUDE · FAISS · SENTENCE-TRANSFORMERS</div>
+
+    <script>
+    function toggleDrop(showId, hideId){
+      var show=document.getElementById(showId);
+      var hide=document.getElementById(hideId);
+      hide.style.display='none';
+      show.style.display=show.style.display==='block'?'none':'block';
+    }
+    function copyEmail(btn){
+      var email='asjyothig@gmail.com';
+      if(navigator.clipboard){
+        navigator.clipboard.writeText(email).then(function(){
+          var orig=btn.textContent;btn.textContent='✓ copied!';
+          setTimeout(function(){btn.textContent=orig;},1800);
+        });
+      } else {
+        var ta=document.createElement('textarea');ta.value=email;
+        document.body.appendChild(ta);ta.select();document.execCommand('copy');
+        document.body.removeChild(ta);
+        var orig=btn.textContent;btn.textContent='✓ copied!';
+        setTimeout(function(){btn.textContent=orig;},1800);
+      }
+    }
+    </script>
     """, unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
-# Inject red-ring killer first (height=0 so invisible)
-st.components.v1.html(RED_RING_KILLER, height=0, scrolling=False)
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
 
 if "index" not in st.session_state:
