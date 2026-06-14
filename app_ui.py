@@ -1,6 +1,6 @@
 import streamlit as st
 import anthropic
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, CrossEncoder
 import fitz
 import tempfile
 import os
@@ -11,15 +11,12 @@ import time
 import re
 import pickle
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# ══════════════════════════════════════════════════════════════════
-# PERSISTENT STORAGE  (survives page refresh, not across machines)
-# ══════════════════════════════════════════════════════════════════
-STORE_DIR   = os.path.join(os.path.expanduser("~"), ".pdfbot_store")
+# ── PERSISTENT STORAGE ────────────────────────────────────────────────────────
+STORE_DIR  = os.path.join(os.path.expanduser("~"), ".pdfbot_store")
 os.makedirs(STORE_DIR, exist_ok=True)
 FAISS_PATH  = os.path.join(STORE_DIR, "index.faiss")
 CHUNKS_PATH = os.path.join(STORE_DIR, "chunks.pkl")
@@ -28,9 +25,9 @@ META_PATH   = os.path.join(STORE_DIR, "meta.pkl")
 
 def save_to_disk(index, chunks, image_store, meta):
     faiss.write_index(index, FAISS_PATH)
-    with open(CHUNKS_PATH,"wb") as f: pickle.dump(chunks, f)
-    with open(IMAGES_PATH,"wb") as f: pickle.dump(image_store, f)
-    with open(META_PATH,  "wb") as f: pickle.dump(meta, f)
+    with open(CHUNKS_PATH, "wb") as f: pickle.dump(chunks, f)
+    with open(IMAGES_PATH, "wb") as f: pickle.dump(image_store, f)
+    with open(META_PATH,   "wb") as f: pickle.dump(meta, f)
 
 def load_from_disk():
     if not all(os.path.exists(p) for p in [FAISS_PATH,CHUNKS_PATH,IMAGES_PATH,META_PATH]):
@@ -41,62 +38,30 @@ def load_from_disk():
     with open(META_PATH,  "rb") as f: meta        = pickle.load(f)
     return index, chunks, image_store, meta
 
-def clear_disk():
-    for p in [FAISS_PATH, CHUNKS_PATH, IMAGES_PATH, META_PATH]:
-        if os.path.exists(p): os.remove(p)
-
 st.set_page_config(page_title="PDF BOT", page_icon="⬡", layout="wide", initial_sidebar_state="expanded")
-
-# ══════════════════════════════════════════════════════════════════
-# AUTO-RESTORE on first load — only if disk has data
-# ══════════════════════════════════════════════════════════════════
-if "index" not in st.session_state and "fresh_start" not in st.session_state:
-    saved = load_from_disk()
-    if saved:
-        idx, chunks, imgs, meta = saved
-        st.session_state.update({
-            "index": idx, "chunks": chunks,
-            "image_store": imgs, "image_count": len(imgs),
-            "chunk_count": len(chunks),
-            "page_count":  meta.get("page_count", 0),
-            "process_time": meta.get("process_time", None),
-            "doc_name": meta.get("doc_name", "previous document"),
-            "messages": [], "chat_display": [],
-        })
-    st.session_state["fresh_start"] = True   # don't restore again this session
 
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-
-/* ── HIDE STREAMLIT CHROME & TOASTS ── */
 #MainMenu,footer,header,[data-testid="stToolbar"],.stDeployButton,
 [data-testid="stNotificationActionButton"],[data-testid="toastContainer"],
 .stToast,[class*="toast"],[class*="Toast"],
-[data-baseweb="notification"],[data-baseweb="toast"]{
-  display:none!important;visibility:hidden!important;pointer-events:none!important;
-}
+[data-baseweb="notification"],[data-baseweb="toast"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}
 
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
-[data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;}
+[data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;min-width:260px!important;}
 [data-testid="stSidebar"]>div{padding-top:0!important;}
 
-/* ── SIDEBAR COLLAPSE BUTTON ── */
-[data-testid="stSidebarCollapseButton"]{
-  position:fixed!important;top:50%!important;left:0!important;
-  transform:translateY(-50%)!important;z-index:99999!important;
-  background:rgba(0,200,255,0.1)!important;
-  border:1px solid rgba(0,200,255,0.55)!important;border-left:none!important;
-  border-radius:0 10px 10px 0!important;width:20px!important;height:56px!important;
-  display:flex!important;align-items:center!important;justify-content:center!important;
-  animation:tabpulse 2.5s ease-in-out infinite!important;
+/* ── HIDE Streamlit's native sidebar toggle — we use our own JS button ── */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="collapsedControl"]{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
 }
-[data-testid="stSidebarCollapseButton"]:hover{background:rgba(0,200,255,0.28)!important;}
-[data-testid="stSidebarCollapseButton"] svg{color:#00dcff!important;width:10px!important;height:10px!important;}
-@keyframes tabpulse{0%,100%{box-shadow:3px 0 10px rgba(0,200,255,0.2);}50%{box-shadow:3px 0 24px rgba(0,200,255,0.55);}}
 
-/* ── FILE UPLOADER ── */
 [data-testid="stFileUploader"]{background:rgba(0,10,30,0.6)!important;border:2px dashed rgba(0,200,255,0.45)!important;border-radius:12px!important;transition:all 0.3s!important;box-shadow:0 0 18px rgba(0,200,255,0.12),inset 0 0 18px rgba(0,200,255,0.04)!important;}
 [data-testid="stFileUploader"]:hover{border-color:rgba(0,200,255,0.85)!important;box-shadow:0 0 32px rgba(0,200,255,0.28),inset 0 0 24px rgba(0,200,255,0.08)!important;}
 [data-testid="stFileUploader"] label{color:rgba(0,200,255,0.7)!important;font-family:'Share Tech Mono',monospace!important;font-size:0.72rem!important;}
@@ -104,21 +69,15 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stFileUploader"] button{border:1px solid rgba(0,200,255,0.4)!important;color:#00dcff!important;background:rgba(0,200,255,0.06)!important;border-radius:6px!important;font-family:'Share Tech Mono',monospace!important;font-size:0.65rem!important;}
 [data-testid="stFileUploader"] svg{color:rgba(0,200,255,0.4)!important;}
 
-/* ── BUTTONS ── */
 .stButton>button{background:transparent!important;border:1px solid rgba(0,200,255,0.4)!important;color:#00dcff!important;border-radius:6px!important;font-family:'Share Tech Mono',monospace!important;font-size:0.7rem!important;letter-spacing:0.1em!important;width:100%!important;padding:9px!important;text-transform:uppercase!important;transition:all 0.25s!important;animation:pulsebtn 2.2s ease-in-out infinite!important;}
 .stButton>button:hover{background:rgba(0,200,255,0.12)!important;border-color:#00dcff!important;box-shadow:0 0 22px rgba(0,200,255,0.3)!important;}
 @keyframes pulsebtn{0%,100%{box-shadow:0 0 8px rgba(0,200,255,0.12)}50%{box-shadow:0 0 20px rgba(0,200,255,0.35)}}
-
-/* Clear button — red tint */
-.clear-btn>button{border-color:rgba(255,60,60,0.4)!important;color:rgba(255,100,100,0.8)!important;animation:none!important;}
-.clear-btn>button:hover{background:rgba(255,60,60,0.08)!important;border-color:rgba(255,60,60,0.8)!important;box-shadow:0 0 16px rgba(255,60,60,0.25)!important;}
 
 .stProgress>div>div{background:linear-gradient(90deg,#00dcff,#00ff88)!important;}
 .stProgress>div{background:rgba(0,200,255,0.08)!important;border-radius:0!important;}
 .stSuccess{background:rgba(0,255,136,0.06)!important;border:1px solid rgba(0,255,136,0.2)!important;border-radius:6px!important;color:#00ff88!important;font-family:'Share Tech Mono',monospace!important;font-size:0.75rem!important;}
 .block-container{padding:0!important;max-width:100%!important;}
 
-/* ── CHAT MESSAGES — WhatsApp style ── */
 [data-testid="stChatMessage"]{background:transparent!important;border:none!important;padding:3px 20px!important;margin-bottom:4px!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"])>div:last-child{background:rgba(0,18,38,0.92)!important;border:1px solid rgba(0,200,255,0.18)!important;border-radius:2px 18px 18px 18px!important;padding:13px 17px!important;font-size:0.88rem!important;line-height:1.75!important;color:#cce8ff!important;max-width:65%!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"])>div:last-child{background:linear-gradient(135deg,rgba(0,100,200,0.4),rgba(60,0,180,0.45))!important;border:1px solid rgba(80,160,255,0.35)!important;border-radius:18px 2px 18px 18px!important;padding:13px 17px!important;font-size:0.88rem!important;line-height:1.75!important;color:#e8f6ff!important;max-width:65%!important;}
@@ -126,21 +85,77 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#002a40,#005580)!important;border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#1a0050,#4400cc)!important;border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;}
 
-/* ── CHAT INPUT — KILL RED RING ── */
-[data-testid="stChatInput"]{background:rgba(0,2,15,0.96)!important;border-top:1px solid rgba(0,200,255,0.14)!important;padding:12px 20px!important;}
-[data-testid="stChatInput"]>div,[data-testid="stChatInput"]>div>div{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
-[data-testid="stChatInput"] [data-baseweb="base-input"],[data-testid="stChatInput"] [data-baseweb="textarea"],[data-testid="stChatInput"] [class*="InputContainer"]{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
-[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.3)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;box-shadow:none!important;caret-color:#00dcff!important;}
-[data-testid="stChatInput"] textarea:focus,[data-testid="stChatInput"] textarea:focus-visible{border:1.5px solid rgba(0,200,255,0.8)!important;outline:none!important;box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;background:rgba(0,200,255,0.06)!important;}
+/* ══════════════════════════════════════════════
+   CHAT INPUT — KILL RED BORDER COMPLETELY
+   The red comes from [data-baseweb="base-input"]
+   which Streamlit wraps around the textarea.
+   We nuke every possible source.
+══════════════════════════════════════════════ */
+[data-testid="stChatInput"]{
+  background:rgba(0,2,15,0.96)!important;
+  border-top:1px solid rgba(0,200,255,0.14)!important;
+  border:none!important;
+  padding:12px 20px!important;
+  outline:none!important;
+  box-shadow:none!important;
+}
+/* The outer div Streamlit injects */
+[data-testid="stChatInput"]>div{
+  border:none!important;
+  outline:none!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+/* BaseWeb wrapper — this is what goes red */
+[data-testid="stChatInput"] [data-baseweb="base-input"],
+[data-testid="stChatInput"] [data-baseweb="textarea"],
+[data-testid="stChatInput"] [class*="InputContainer"],
+[data-testid="stChatInput"] [class*="BaseInput"]{
+  border:none!important;
+  outline:none!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+/* The actual textarea pill */
+[data-testid="stChatInput"] textarea{
+  background:rgba(0,200,255,0.04)!important;
+  border:1.5px solid rgba(0,200,255,0.3)!important;
+  border-radius:26px!important;
+  color:#a8dcf8!important;
+  font-family:'Inter',sans-serif!important;
+  font-size:0.9rem!important;
+  padding:11px 20px!important;
+  outline:none!important;
+  box-shadow:none!important;
+  caret-color:#00dcff!important;
+}
+[data-testid="stChatInput"] textarea:focus,
+[data-testid="stChatInput"] textarea:focus-visible,
+[data-testid="stChatInput"] textarea:focus-within{
+  border:1.5px solid rgba(0,200,255,0.8)!important;
+  outline:none!important;
+  box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;
+  background:rgba(0,200,255,0.06)!important;
+}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
 [data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
 [data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.3)!important;box-shadow:0 0 16px rgba(0,200,255,0.4)!important;}
-[data-baseweb="base-input"]:focus-within,[data-baseweb="textarea"]:focus-within{border-color:transparent!important;box-shadow:none!important;outline:none!important;}
-*:focus,*:focus-visible,*:focus-within{outline:none!important;}
+
+/* Nuclear option: kill ALL red/orange/default outlines sitewide */
+*:focus,*:focus-visible,*:focus-within{
+  outline:none!important;
+}
+/* BaseWeb uses internal state classes for the red ring — kill them all */
+[data-baseweb="base-input"]:focus-within,
+[data-baseweb="base-input"]:focus,
+[data-baseweb="textarea"]:focus-within{
+  border-color:transparent!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
 
 ::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.25);border-radius:2px;}
 
-/* ── SIDEBAR UTILS ── */
 .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
 .metric-card{background:rgba(0,200,255,0.03);border:1px solid rgba(0,200,255,0.1);border-radius:6px;padding:10px 8px;text-align:center;transition:all 0.3s;}
 .metric-card:hover{border-color:rgba(0,200,255,0.35);background:rgba(0,200,255,0.06);}
@@ -167,26 +182,6 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 @keyframes rcfade{to{opacity:1}}
 </style>
 """, unsafe_allow_html=True)
-
-# ── RED RING KILLER ────────────────────────────────────────────────────────────
-RED_RING_KILLER = """
-<script>
-(function(){
-  var RED_RE=/rgb\(255[\s,]+\d+[\s,]+\d+\)|rgba\(255[\s,]+\d+[\s,]+\d+/i;
-  function fix(){
-    document.querySelectorAll('*').forEach(function(el){
-      var bs=window.getComputedStyle(el).boxShadow||'';
-      if(RED_RE.test(bs)){el.style.setProperty('box-shadow','none','important');el.style.setProperty('outline','none','important');}
-    });
-    var w=document.querySelector('[data-testid="stChatInput"]');
-    if(w){w.style.setProperty('box-shadow','none','important');w.style.setProperty('outline','none','important');}
-  }
-  new MutationObserver(fix).observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['style','class']});
-  document.addEventListener('focusin',fix);
-  setInterval(fix,400);
-})();
-</script>
-"""
 
 HERO_HTML = """
 <style>
@@ -353,7 +348,8 @@ function inject(el){
   nativeSetter.call(ta,text);
   ta.dispatchEvent(new window.parent.Event('input',{bubbles:true}));
   ta.dispatchEvent(new window.parent.Event('change',{bubbles:true}));
-  ta.focus();ta.setSelectionRange(text.length,text.length);
+  ta.focus();
+  ta.setSelectionRange(text.length,text.length);
 }
 </script>
 """
@@ -387,16 +383,31 @@ def find_matching_images(question, image_store):
         idx = int(n)-1
         if 0 <= idx < len(image_store): return [image_store[idx]]
     if "last" in q: return [image_store[-1]]
-    if "all"  in q: return image_store[:5]
+    if "all" in q: return image_store[:5]
     return [image_store[0]]
 
 @st.cache_resource
 def load_models():
-    m = SentenceTransformer('all-MiniLM-L6-v2')
-    c = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    return m, c
+    m  = SentenceTransformer('all-MiniLM-L6-v2')
+    ce = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+    c  = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    return m, ce, c
 
-model, anthropic_client = load_models()
+model, cross_encoder, anthropic_client = load_models()
+
+# ── AUTO-RESTORE from disk on first load ──────────────────────────────────────
+if "index" not in st.session_state:
+    saved = load_from_disk()
+    if saved:
+        idx, chunks, imgs, meta = saved
+        st.session_state.update({
+            "index": idx, "chunks": chunks,
+            "image_store": imgs, "image_count": len(imgs),
+            "chunk_count": len(chunks),
+            "page_count":  meta.get("page_count", 0),
+            "process_time": meta.get("process_time", None),
+            "messages": [], "chat_display": [],
+        })
 
 def extract_chunks(text, chunk_size=500, overlap=100):
     words = text.split()
@@ -406,24 +417,7 @@ def extract_chunks(text, chunk_size=500, overlap=100):
         i += chunk_size - overlap
     return chunks
 
-def describe_image_parallel(args):
-    """Describe a single image via Claude — runs in thread pool."""
-    client, b64, mt, pnum, img_idx = args
-    try:
-        resp = client.messages.create(
-            model="claude-haiku-4-5-20251001", max_tokens=200,
-            messages=[{"role":"user","content":[
-                {"type":"image","source":{"type":"base64","media_type":mt,"data":b64}},
-                {"type":"text","text":"Describe this image in one concise sentence. Focus on what it shows."}
-            ]}]
-        )
-        return img_idx, pnum, b64, mt, resp.content[0].text
-    except Exception:
-        return img_idx, pnum, b64, mt, f"Image on page {pnum+1}"
-
-# ══════════════════════════════════════════════════════════════════
-# SIDEBAR
-# ══════════════════════════════════════════════════════════════════
+# ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
     <div style="padding:14px 14px 10px;border-bottom:1px solid rgba(0,200,255,0.1);margin-bottom:8px;">
@@ -432,40 +426,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Built by ──
-    st.markdown("""
-    <span class="s-label">// Built by</span>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:rgba(0,200,255,0.6);margin-bottom:8px;">Sai Jyothi Gayathri Adabala</div>
-    <style>
-    .cb-row{display:flex;gap:6px;margin-bottom:4px;}
-    .cb-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px 6px;border:1px solid rgba(0,200,255,0.2);border-radius:7px;font-family:'Share Tech Mono',monospace;font-size:.55rem;color:rgba(0,200,255,0.55);cursor:pointer;background:rgba(0,200,255,0.03);transition:all .2s;user-select:none;}
-    .cb-btn:hover{border-color:rgba(0,200,255,0.6);color:#00dcff;background:rgba(0,200,255,0.08);}
-    .cb-dropdown{display:none;margin-top:3px;margin-bottom:4px;background:rgba(0,10,28,0.95);border:1px solid rgba(0,200,255,0.2);border-radius:7px;padding:8px 12px;font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.6);animation:dropIn 0.2s ease;}
-    .cb-dropdown a{color:#00dcff;text-decoration:none;}
-    @keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-    </style>
-    <div class="cb-row">
-      <div class="cb-btn" onclick="toggleDrop('email-drop')">✉ email</div>
-      <div class="cb-btn" onclick="toggleDrop('li-drop')">in linkedin</div>
-    </div>
-    <div id="email-drop" class="cb-dropdown">
-      ✉ <a href="mailto:asjyothig@gmail.com">asjyothig@gmail.com</a>
-      <span onclick="copyText('asjyothig@gmail.com',this)" style="float:right;cursor:pointer;color:rgba(0,200,255,0.4);font-size:0.5rem;">copy</span>
-    </div>
-    <div id="li-drop" class="cb-dropdown">
-      <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank">linkedin.com/in/sai-jyothi-gayathri-adabala</a>
-    </div>
-    <script>
-    function toggleDrop(id){var el=document.getElementById(id);var other=id==='email-drop'?'li-drop':'email-drop';document.getElementById(other).style.display='none';el.style.display=el.style.display==='block'?'none':'block';}
-    function copyText(txt,btn){navigator.clipboard.writeText(txt).then(function(){var old=btn.textContent;btn.textContent='✓';setTimeout(function(){btn.textContent=old;},1500);});}
-    </script>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
-
-    # ── Document section ──
     st.markdown('<span class="s-label">// Document</span>', unsafe_allow_html=True)
-
     if "show_uploader" not in st.session_state:
         st.session_state.show_uploader = True
 
@@ -488,10 +449,10 @@ with st.sidebar:
 
                 def show_proc(step, pct, chunks_n=0, images_n=0):
                     rows = ""
-                    for i,lbl in enumerate(STEPS):
-                        col = "rgba(0,255,136,0.85)" if i<step else ("rgba(0,200,255,0.95)" if i==step else "rgba(0,200,255,0.18)")
-                        ind = "✓" if i<step else ("●" if i==step else "○")
-                        rows += f'<div style="font-family:Share Tech Mono,monospace;font-size:0.62rem;color:{col};padding:3px 0;">{ind} &gt; {lbl}</div>'
+                    for i, lbl in enumerate(STEPS):
+                        col = "rgba(0,255,136,0.85)" if i < step else ("rgba(0,200,255,0.95)" if i == step else "rgba(0,200,255,0.18)")
+                        ind = "✓" if i < step else ("●" if i == step else "○")
+                        rows += f'<div style="font-family:Share Tech Mono,monospace;font-size:0.62rem;color:{col};padding:3px 0;letter-spacing:.05em;">{ind} &gt; {lbl}</div>'
                     stats = ""
                     if chunks_n > 0:
                         stats = (f'<div style="display:flex;gap:24px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,200,255,0.1);">'
@@ -511,90 +472,64 @@ with st.sidebar:
                     tmp.write(uploaded_file.read()); tmp_path = tmp.name
 
                 doc = fitz.open(tmp_path)
-                full_text, total = "", len(doc)
+                full_text, total, image_store, img_idx = "", len(doc), [], 0
 
-                # Step 1: extract text + collect raw images
-                show_proc(1, 10)
-                raw_images = []   # (pnum, b64, mt, global_idx)
-                g_idx = 0
+                show_proc(1, 15)
                 for pnum, page in enumerate(doc):
                     full_text += page.get_text()
                     for img in page.get_images():
                         try:
                             xref = img[0]; bi = doc.extract_image(xref)
                             b64 = base64.b64encode(bi["image"]).decode()
-                            mt = "image/png" if bi["ext"]=="png" else "image/jpeg"
-                            raw_images.append((pnum, b64, mt, g_idx))
-                            g_idx += 1
+                            mt = "image/png" if bi["ext"] == "png" else "image/jpeg"
+                            resp = anthropic_client.messages.create(
+                                model="claude-haiku-4-5-20251001", max_tokens=300,
+                                messages=[{"role":"user","content":[
+                                    {"type":"image","source":{"type":"base64","media_type":mt,"data":b64}},
+                                    {"type":"text","text":"Describe this image concisely. If diagram/chart, explain what it shows."}
+                                ]}]
+                            )
+                            desc = resp.content[0].text
+                            image_store.append({"b64":b64,"media_type":mt,"page":pnum+1,"index":img_idx,"description":desc})
+                            img_idx += 1
+                            full_text += f"\n[Image {img_idx} on page {pnum+1}]: {desc}\n"
                         except: continue
-                    show_proc(1, 10+int((pnum+1)/total*25))
+                    show_proc(1, 15+int((pnum+1)/total*30), images_n=img_idx)
 
                 doc.close(); os.unlink(tmp_path)
-
-                # Step 2: describe images IN PARALLEL (max 6 workers, 8s timeout each)
-                show_proc(2, 38, images_n=len(raw_images))
-                image_store = [None] * len(raw_images)
-                MAX_WORKERS = min(6, len(raw_images)) if raw_images else 1
-                IMAGE_TIMEOUT = 8  # seconds per image
-
-                if raw_images:
-                    args_list = [(anthropic_client, b64, mt, pnum, gi) for pnum,b64,mt,gi in raw_images]
-                    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as ex:
-                        futures = {ex.submit(describe_image_parallel, a): a for a in args_list}
-                        done_count = 0
-                        for future in as_completed(futures, timeout=IMAGE_TIMEOUT*len(raw_images)+30):
-                            try:
-                                gi, pnum, b64, mt, desc = future.result(timeout=IMAGE_TIMEOUT)
-                                image_store[gi] = {"b64":b64,"media_type":mt,"page":pnum+1,"index":gi,"description":desc}
-                                full_text += f"\n[Image {gi+1} on page {pnum+1}]: {desc}\n"
-                            except Exception:
-                                pass
-                            done_count += 1
-                            show_proc(2, 38+int(done_count/max(len(raw_images),1)*20), images_n=done_count)
-
-                # Remove any None slots (failed images)
-                image_store = [x for x in image_store if x is not None]
-                # Re-index
-                for i, img in enumerate(image_store): img["index"] = i
-
-                show_proc(3, 60, images_n=len(image_store))
+                show_proc(2, 50, images_n=img_idx)
                 chunks = extract_chunks(full_text)
-                show_proc(4, 75, chunks_n=len(chunks), images_n=len(image_store))
+                show_proc(3, 68, chunks_n=len(chunks), images_n=img_idx)
                 embs = np.array(model.encode(chunks)).astype('float32')
-                show_proc(5, 92, chunks_n=len(chunks), images_n=len(image_store))
+                show_proc(4, 88, chunks_n=len(chunks), images_n=img_idx)
                 index = faiss.IndexFlatL2(embs.shape[1]); index.add(embs)
-                show_proc(6, 100, chunks_n=len(chunks), images_n=len(image_store))
+                show_proc(5, 100, chunks_n=len(chunks), images_n=img_idx)
                 time.sleep(0.4); proc_ph.empty()
                 t_done = time.time() - t_start
 
-                meta = {"page_count":total,"process_time":t_done,"doc_name":uploaded_file.name}
+                meta = {"page_count": total, "process_time": t_done}
                 save_to_disk(index, chunks, image_store, meta)
 
                 st.session_state.update({
                     "index":index,"chunks":chunks,"messages":[],"chat_display":[],
                     "chunk_count":len(chunks),"image_store":image_store,"image_count":len(image_store),
-                    "page_count":total,"process_time":t_done,"doc_name":uploaded_file.name,
-                    "show_uploader":False,
+                    "page_count":total,"process_time":t_done,"show_uploader":False,
                 })
                 st.rerun()
     else:
         uploaded_file = None
         if "chunk_count" in st.session_state:
-            doc_name = st.session_state.get("doc_name","document")
-            st.markdown(f"""
+            st.markdown("""
             <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,255,136,0.6);
-              padding:5px 8px;border-left:2px solid rgba(0,255,136,0.3);margin-bottom:4px;word-break:break-all;">
-              ✓ {doc_name}</div>""", unsafe_allow_html=True)
+              padding:5px 8px;border-left:2px solid rgba(0,255,136,0.3);margin-bottom:4px;">
+              ✓ Document indexed &amp; ready</div>""", unsafe_allow_html=True)
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
-    # ── METRICS — show — when no doc loaded this session ──
-    has_doc = "index" in st.session_state
-    cc = st.session_state.get("chunk_count", 0) if has_doc else 0
-    ic = st.session_state.get("image_count", 0) if has_doc else 0
-    pc = st.session_state.get("page_count",  0) if has_doc else 0
-    pt = st.session_state.get("process_time", None) if has_doc else None
-
+    cc = st.session_state.get("chunk_count",0)
+    ic = st.session_state.get("image_count",0)
+    pc = st.session_state.get("page_count",0)
+    pt = st.session_state.get("process_time",None)
     st.markdown('<span class="s-label">// Last Run</span>', unsafe_allow_html=True)
     st.markdown(f"""
     <div class="metric-grid">
@@ -602,26 +537,11 @@ with st.sidebar:
       <div class="metric-card"><div class="metric-val">{cc or '—'}</div><div class="metric-lbl">Chunks</div></div>
       <div class="metric-card"><div class="metric-val">{ic or '—'}</div><div class="metric-lbl">Images</div></div>
       <div class="metric-card"><div class="metric-val">{cc or '—'}</div><div class="metric-lbl">Vectors</div></div>
-      <div class="metric-card" style="grid-column:span 2">
-        <div class="metric-val">{fmt_time(pt) if pt else '—'}</div>
-        <div class="metric-lbl">Process Time</div>
-      </div>
+      <div class="metric-card" style="grid-column:span 2"><div class="metric-val">{fmt_time(pt) if pt else '—'}</div><div class="metric-lbl">Process Time</div></div>
     </div>""", unsafe_allow_html=True)
 
-    # ── CLEAR BUTTON — visible only when data exists ──
-    if has_doc:
-        st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
-        st.markdown('<div class="clear-btn">', unsafe_allow_html=True)
-        if st.button("🗑  CLEAR DOCUMENT", key="clear_doc"):
-            clear_disk()
-            for key in ["index","chunks","image_store","image_count","chunk_count",
-                        "page_count","process_time","doc_name","messages","chat_display"]:
-                st.session_state.pop(key, None)
-            st.session_state["show_uploader"] = True
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
-
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
+
     st.markdown("""
     <span class="s-label">// Tips</span>
     <div class="sys-tips">
@@ -631,13 +551,147 @@ with st.sidebar:
       › reference page numbers<br>
       › request summaries
     </div>
-    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">CLAUDE · FAISS · SENTENCE-TRANSFORMERS</div>
     """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════
-# MAIN
-# ══════════════════════════════════════════════════════════════════
-st.components.v1.html(RED_RING_KILLER, height=0, scrolling=False)
+    st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
+
+    st.markdown('<span class="s-label">// Built by</span>', unsafe_allow_html=True)
+    st.markdown("""
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;
+      color:rgba(0,200,255,0.6);margin-bottom:10px;">
+      Sai Jyothi Gayathri Adabala
+    </div>""", unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    if col1.button("✉ email", key="btn_email"):
+        st.session_state["contact_show"] = "email" if st.session_state.get("contact_show") != "email" else None
+    if col2.button("in linkedin", key="btn_li"):
+        st.session_state["contact_show"] = "linkedin" if st.session_state.get("contact_show") != "linkedin" else None
+
+    cs = st.session_state.get("contact_show")
+    if cs == "email":
+        st.markdown("""
+        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
+          border-radius:8px;padding:10px 14px;">
+          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:rgba(0,200,255,0.75);letter-spacing:.04em;">
+            ✉ &nbsp;asjyothig@gmail.com</div>
+        </div>""", unsafe_allow_html=True)
+    elif cs == "linkedin":
+        st.markdown("""
+        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
+          border-radius:8px;padding:10px 14px;">
+          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
+          <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank"
+             style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#00dcff;text-decoration:none;
+               display:block;border:1px solid rgba(0,200,255,0.35);border-radius:6px;padding:7px 10px;
+               text-align:center;background:rgba(0,200,255,0.06);">
+            → Open LinkedIn Profile ↗
+          </a>
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;
+      color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;
+      border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">
+      CLAUDE · FAISS · SENTENCE-TRANSFORMERS
+    </div>""", unsafe_allow_html=True)
+
+# ── MAIN ──────────────────────────────────────────────────────────────────────
+# Floating sidebar toggle button — injected via JS into the parent page.
+# Works on desktop AND mobile. Persists even when sidebar is fully collapsed.
+st.components.v1.html("""
+<script>
+(function(){
+  var STYLE_ID = 'sb-float-style';
+  var BTN_ID   = 'sb-float-btn';
+
+  function getDoc(){ return window.parent ? window.parent.document : document; }
+
+  function ensureStyle(doc){
+    if(doc.getElementById(STYLE_ID)) return;
+    var s = doc.createElement('style');
+    s.id = STYLE_ID;
+    s.textContent = [
+      '@keyframes sbglow{0%,100%{box-shadow:0 0 14px rgba(0,200,255,.4),3px 0 10px rgba(0,200,255,.15)}',
+      '50%{box-shadow:0 0 30px rgba(0,200,255,.85),3px 0 20px rgba(0,200,255,.4)}}',
+      '#'+BTN_ID+'{',
+        'position:fixed!important;',
+        'left:0!important;top:50%!important;',
+        'transform:translateY(-50%)!important;',
+        'z-index:2147483647!important;',
+        'width:26px!important;height:60px!important;',
+        'background:rgba(0,8,24,0.95)!important;',
+        'border:1.5px solid rgba(0,200,255,0.65)!important;',
+        'border-left:none!important;',
+        'border-radius:0 10px 10px 0!important;',
+        'color:#00dcff!important;',
+        'font-size:14px!important;',
+        'cursor:pointer!important;',
+        'display:flex!important;align-items:center!important;justify-content:center!important;',
+        'animation:sbglow 2.2s ease-in-out infinite!important;',
+        'transition:background 0.2s!important;',
+        'outline:none!important;',
+        'padding:0!important;',
+      '}',
+      '#'+BTN_ID+':hover{background:rgba(0,200,255,0.28)!important;}'
+    ].join('');
+    doc.head.appendChild(s);
+  }
+
+  function ensureButton(doc){
+    if(doc.getElementById(BTN_ID)) return;
+    var btn = doc.createElement('button');
+    btn.id = BTN_ID;
+    btn.title = 'Toggle Sidebar';
+    btn.innerHTML = '&#8942;'; // ⋮ vertical dots
+    btn.setAttribute('aria-label','Toggle sidebar');
+
+    btn.addEventListener('click', function(){
+      // Strategy 1: click Streamlit's native collapse/expand button
+      var targets = [
+        '[data-testid="stSidebarCollapseButton"] button',
+        '[data-testid="stSidebarCollapseButton"]',
+        '[data-testid="collapsedControl"] button',
+        '[data-testid="collapsedControl"]',
+      ];
+      for(var i=0;i<targets.length;i++){
+        var el = doc.querySelector(targets[i]);
+        if(el){ el.click(); return; }
+      }
+      // Strategy 2: toggle sidebar display directly
+      var sb = doc.querySelector('[data-testid="stSidebar"]');
+      if(sb){
+        sb.style.display = (sb.style.display === 'none') ? '' : 'none';
+      }
+    });
+
+    doc.body.appendChild(btn);
+  }
+
+  function init(){
+    var doc = getDoc();
+    ensureStyle(doc);
+    ensureButton(doc);
+  }
+
+  // Run immediately + after Streamlit rehydrates
+  init();
+  setTimeout(init, 600);
+  setTimeout(init, 1800);
+
+  // Watch for Streamlit re-renders that might remove the button
+  var doc = getDoc();
+  var observer = new MutationObserver(function(mutations){
+    if(!doc.getElementById(BTN_ID)) ensureButton(doc);
+  });
+  setTimeout(function(){
+    observer.observe(doc.body, {childList: true, subtree: false});
+  }, 800);
+})();
+</script>
+""", height=0, scrolling=False)
+
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
 
 if "index" not in st.session_state:
@@ -673,11 +727,18 @@ else:
         think_ph = st.empty()
         think_ph.markdown(THINKING_HTML, unsafe_allow_html=True)
 
+        # Step 1: broad FAISS recall (top-10)
         q_emb = np.array([model.encode(question)]).astype('float32')
-        _, idxs = st.session_state.index.search(q_emb, 3)
-        context = "\n\n".join(st.session_state.chunks[i] for i in idxs[0])
+        _, idxs = st.session_state.index.search(q_emb, min(10, len(st.session_state.chunks)))
+        candidate_chunks = [(int(i), st.session_state.chunks[int(i)]) for i in idxs[0]]
 
-        think_ph.markdown(retrieval_html([int(i)+1 for i in idxs[0]]), unsafe_allow_html=True)
+        # Step 2: cross-encoder re-rank → keep top-3
+        ce_scores = cross_encoder.predict([(question, ch) for _, ch in candidate_chunks])
+        ranked    = sorted(zip(ce_scores, candidate_chunks), reverse=True)[:3]
+        top_idxs  = [idx for _, (idx, _) in ranked]
+        context   = "\n\n".join(ch for _, (_, ch) in ranked)
+
+        think_ph.markdown(retrieval_html([i+1 for i in top_idxs]), unsafe_allow_html=True)
         time.sleep(0.3)
         think_ph.empty()
 
@@ -687,11 +748,11 @@ else:
             max_tok = 250
         else:
             st.session_state.messages.append({"role":"user","content":f"Context:\n{context}\n\nQuestion: {question}"})
-            system_prompt = "You are an intelligent document assistant. Answer clearly. Use bullet points for lists. Bold key terms using **term**. If not in context, look for related concepts."
-            max_tok = 1024
+            system_prompt = "You are an expert document analyst. Answer clearly and thoroughly. Use bullet points for lists. Bold **key terms**. Cite page numbers when known. If something isn't in the context, say so rather than guessing."
+            max_tok = 2048
 
         response = anthropic_client.messages.create(
-            model="claude-haiku-4-5-20251001", max_tokens=max_tok,
+            model="claude-sonnet-4-6", max_tokens=max_tok,
             system=system_prompt, messages=st.session_state.messages
         )
         reply = response.content[0].text
