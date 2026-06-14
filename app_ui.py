@@ -15,7 +15,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── PERSISTENT STORAGE ────────────────────────────────────────────────────────
 STORE_DIR  = os.path.join(os.path.expanduser("~"), ".pdfbot_store")
 os.makedirs(STORE_DIR, exist_ok=True)
 FAISS_PATH  = os.path.join(STORE_DIR, "index.faiss")
@@ -57,11 +56,7 @@ st.markdown("""
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
 [data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;min-width:260px!important;}
 [data-testid="stSidebar"]>div{padding-top:0!important;}
-
-[data-testid="stSidebarCollapseButton"],
-[data-testid="collapsedControl"]{
-  display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
-}
+[data-testid="stSidebarCollapseButton"],[data-testid="collapsedControl"]{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;}
 
 [data-testid="stFileUploader"]{background:rgba(0,10,30,0.6)!important;border:2px dashed rgba(0,200,255,0.45)!important;border-radius:12px!important;transition:all 0.3s!important;box-shadow:0 0 18px rgba(0,200,255,0.12),inset 0 0 18px rgba(0,200,255,0.04)!important;}
 [data-testid="stFileUploader"]:hover{border-color:rgba(0,200,255,0.85)!important;box-shadow:0 0 32px rgba(0,200,255,0.28),inset 0 0 24px rgba(0,200,255,0.08)!important;}
@@ -90,7 +85,7 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stChatInput"]>div{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
 [data-testid="stChatInput"] [data-baseweb="base-input"],[data-testid="stChatInput"] [data-baseweb="textarea"],[data-testid="stChatInput"] [class*="InputContainer"],[data-testid="stChatInput"] [class*="BaseInput"]{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
 [data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.3)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;box-shadow:none!important;caret-color:#00dcff!important;}
-[data-testid="stChatInput"] textarea:focus,[data-testid="stChatInput"] textarea:focus-visible,[data-testid="stChatInput"] textarea:focus-within{border:1.5px solid rgba(0,200,255,0.8)!important;outline:none!important;box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;background:rgba(0,200,255,0.06)!important;}
+[data-testid="stChatInput"] textarea:focus,[data-testid="stChatInput"] textarea:focus-visible{border:1.5px solid rgba(0,200,255,0.8)!important;outline:none!important;box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;background:rgba(0,200,255,0.06)!important;}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
 [data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
 [data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.3)!important;box-shadow:0 0 16px rgba(0,200,255,0.4)!important;}
@@ -122,6 +117,18 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 .rc-line{animation:rcfade 0.4s ease forwards;opacity:0;font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.4);line-height:1.9;}
 .rc-line:nth-child(2){animation-delay:.15s}.rc-line:nth-child(3){animation-delay:.3s}
 @keyframes rcfade{to{opacity:1}}
+
+/* accuracy metric special color */
+.metric-card.accuracy .metric-val{color:#00ff88;}
+.metric-card.accuracy{border-color:rgba(0,255,136,0.15);}
+
+/* feedback buttons */
+.fb-row{display:flex;gap:6px;margin-top:8px;align-items:center;}
+.fb-btn{background:transparent;border:1px solid rgba(0,200,255,0.15);border-radius:20px;padding:3px 10px;font-size:0.65rem;cursor:pointer;transition:all .2s;font-family:'Share Tech Mono',monospace;color:rgba(0,200,255,0.35);}
+.fb-btn:hover{border-color:rgba(0,200,255,0.6);color:#00dcff;}
+.fb-btn.liked{border-color:rgba(0,255,136,0.6);color:#00ff88;background:rgba(0,255,136,0.06);}
+.fb-btn.disliked{border-color:rgba(255,80,80,0.5);color:rgba(255,100,100,0.8);background:rgba(255,50,50,0.05);}
+.fb-score{font-family:'Share Tech Mono',monospace;font-size:0.5rem;color:rgba(0,200,255,0.25);margin-left:4px;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -305,9 +312,10 @@ THINKING_HTML = """
 </div>
 """
 
-def retrieval_html(chunk_indices):
+def retrieval_html(chunk_indices, confidence_pct):
     lines = "".join(f'<div class="rc-line">› Chunk {i} matched ✓</div>' for i in chunk_indices)
-    return f'<div style="padding:6px 20px;">{lines}</div>'
+    color = "#00ff88" if confidence_pct >= 80 else "#00dcff" if confidence_pct >= 60 else "rgba(255,180,0,0.8)"
+    return f'<div style="padding:6px 20px;">{lines}<div style="font-family:Share Tech Mono,monospace;font-size:0.5rem;color:{color};margin-top:4px;letter-spacing:.08em;">› retrieval confidence: {confidence_pct}%</div></div>'
 
 def fmt_time(s): return f"{s:.1f}s" if s < 60 else f"{int(s//60)}m {s%60:.0f}s"
 def local_time(): return datetime.now().strftime("%I:%M %p").lstrip("0")
@@ -328,30 +336,25 @@ def find_matching_images(question, image_store):
     if "all" in q: return image_store[:5]
     return [image_store[0]]
 
-# ── FIX 2: Smart image matching — find images relevant to the query ───────────
-def find_relevant_images_for_context(question, context_chunks, image_store):
-    """
-    Instead of sending all images to Claude at index time,
-    we match images to the user's question by checking if
-    the image description text appears in the retrieved context chunks.
-    Returns images only when they're genuinely relevant.
-    """
-    if not image_store:
-        return []
-    q = question.lower()
-    relevant = []
-    for img in image_store:
-        desc = img.get("description", "").lower()
-        page = img.get("page", 0)
-        # Check if image description keywords overlap with the question
-        q_words = set(re.findall(r'\b\w{4,}\b', q))
-        d_words = set(re.findall(r'\b\w{4,}\b', desc))
-        overlap = q_words & d_words
-        # Also check if the image's page text appears in retrieved context
-        page_mentioned = f"page {page}" in context_chunks.lower() or f"image {img['index']+1}" in context_chunks.lower()
-        if len(overlap) >= 2 or page_mentioned:
-            relevant.append(img)
-    return relevant[:3]  # cap at 3
+# ── ACCURACY HELPERS ──────────────────────────────────────────────────────────
+def ce_scores_to_pct(scores):
+    """Convert cross-encoder raw scores to 0-100 percentage."""
+    import math
+    def sigmoid(x): return 1 / (1 + math.exp(-x))
+    avg = sum(sigmoid(s) for s in scores[:3]) / min(3, len(scores))
+    return int(round(avg * 100))
+
+def compute_session_accuracy():
+    """Weighted accuracy: base retrieval score + feedback boost."""
+    base = st.session_state.get("last_retrieval_pct", 0)
+    likes = st.session_state.get("total_likes", 0)
+    dislikes = st.session_state.get("total_dislikes", 0)
+    total_fb = likes + dislikes
+    if total_fb == 0:
+        return base
+    fb_score = int((likes / total_fb) * 100)
+    # weighted blend: 60% retrieval, 40% user feedback
+    return int(base * 0.6 + fb_score * 0.4)
 
 @st.cache_resource
 def load_models():
@@ -362,7 +365,6 @@ def load_models():
 
 model, cross_encoder, anthropic_client = load_models()
 
-# ── FIX 1: Only auto-restore if user hasn't explicitly cleared ────────────────
 if "index" not in st.session_state and not st.session_state.get("cleared", False):
     saved = load_from_disk()
     if saved:
@@ -373,8 +375,11 @@ if "index" not in st.session_state and not st.session_state.get("cleared", False
             "chunk_count": len(chunks),
             "page_count":  meta.get("page_count", 0),
             "process_time": meta.get("process_time", None),
+            "intro_context": meta.get("intro_context", ""),
             "messages": [], "chat_display": [],
-            "restored_from_disk": True,   # flag so we show a notice
+            "restored_from_disk": True,
+            "total_likes": 0, "total_dislikes": 0,
+            "last_retrieval_pct": 0,
         })
 
 def extract_chunks(text, chunk_size=500, overlap=100):
@@ -396,7 +401,6 @@ with st.sidebar:
 
     st.markdown('<span class="s-label">// Document</span>', unsafe_allow_html=True)
 
-    # ── FIX 1: Show restored-from-disk banner + Clear button ──
     if st.session_state.get("restored_from_disk"):
         st.markdown("""
         <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;
@@ -409,7 +413,7 @@ with st.sidebar:
             clear_disk()
             for k in ["index","chunks","image_store","image_count","chunk_count",
                       "page_count","process_time","messages","chat_display",
-                      "restored_from_disk","show_uploader"]:
+                      "restored_from_disk","show_uploader","total_likes","total_dislikes","last_retrieval_pct"]:
                 st.session_state.pop(k, None)
             st.session_state["cleared"] = True
             st.rerun()
@@ -432,7 +436,7 @@ with st.sidebar:
             if st.button("⚡  PROCESS & INDEX"):
                 t_start = time.time()
                 proc_ph = st.empty()
-                STEPS = ["extracting text","indexing images (metadata only)","chunking","embedding","building index","ready ✓"]
+                STEPS = ["extracting text","indexing images","chunking","embedding","building index","ready ✓"]
 
                 def show_proc(step, pct, chunks_n=0, images_n=0):
                     rows = ""
@@ -461,8 +465,6 @@ with st.sidebar:
                 doc = fitz.open(tmp_path)
                 full_text, total, image_store, img_idx = "", len(doc), [], 0
 
-                # ── FIX 2: Extract images WITHOUT calling Claude API ──
-                # Store raw b64 + page position. Claude only sees them when user asks.
                 show_proc(1, 15)
                 for pnum, page in enumerate(doc):
                     full_text += page.get_text()
@@ -471,24 +473,14 @@ with st.sidebar:
                             xref = img[0]; bi = doc.extract_image(xref)
                             b64 = base64.b64encode(bi["image"]).decode()
                             mt = "image/png" if bi["ext"] == "png" else "image/jpeg"
-                            # Lightweight placeholder description — no API call
                             desc = f"Image on page {pnum+1} (visual content — ask to view)"
-                            image_store.append({
-                                "b64": b64, "media_type": mt,
-                                "page": pnum+1, "index": img_idx,
-                                "description": desc,
-                                "described": False,   # flag: not yet sent to Claude
-                            })
+                            image_store.append({"b64":b64,"media_type":mt,"page":pnum+1,"index":img_idx,"description":desc,"described":False})
                             img_idx += 1
                             full_text += f"\n[Image {img_idx} on page {pnum+1}]\n"
                         except: continue
                     show_proc(1, 15+int((pnum+1)/total*30), images_n=img_idx)
 
                 doc.close(); os.unlink(tmp_path)
-
-                # ── FIX 3: Extract context from first 3 pages for tutor persona ──
-                doc2 = fitz.open(tmp_path) if False else None  # already closed
-                # We already have full_text; extract first ~1500 words as context
                 intro_words = " ".join(full_text.split()[:1500])
 
                 show_proc(2, 50, images_n=img_idx)
@@ -509,8 +501,8 @@ with st.sidebar:
                     "chunk_count": len(chunks), "image_store": image_store,
                     "image_count": len(image_store), "page_count": total,
                     "process_time": t_done, "show_uploader": False,
-                    "intro_context": intro_words,
-                    "restored_from_disk": False,
+                    "intro_context": intro_words, "restored_from_disk": False,
+                    "total_likes": 0, "total_dislikes": 0, "last_retrieval_pct": 0,
                 })
                 st.rerun()
     else:
@@ -523,23 +515,30 @@ with st.sidebar:
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
-    # ── FIX 1: Show — instead of old numbers when session has no doc ──
-    this_session = not st.session_state.get("restored_from_disk", False)
     cc = st.session_state.get("chunk_count", 0)
     ic = st.session_state.get("image_count", 0)
     pc = st.session_state.get("page_count",  0)
     pt = st.session_state.get("process_time", None)
-    # Only show real numbers if indexed this session OR restored and not cleared
     show_stats = "chunk_count" in st.session_state
+
+    # ── ACCURACY SCORE ──
+    accuracy = compute_session_accuracy() if show_stats else 0
+    accuracy_disp = f"{accuracy}%" if show_stats else "—"
+    accuracy_color = "#00ff88" if accuracy >= 80 else "#00dcff" if accuracy >= 60 else "rgba(255,180,0,0.9)"
+
     st.markdown('<span class="s-label">// Last Run</span>', unsafe_allow_html=True)
     st.markdown(f"""
     <div class="metric-grid">
       <div class="metric-card"><div class="metric-val">{pc if show_stats else '—'}</div><div class="metric-lbl">Pages</div></div>
       <div class="metric-card"><div class="metric-val">{cc if show_stats else '—'}</div><div class="metric-lbl">Chunks</div></div>
       <div class="metric-card"><div class="metric-val">{ic if show_stats else '—'}</div><div class="metric-lbl">Images</div></div>
-      <div class="metric-card"><div class="metric-val">{cc if show_stats else '—'}</div><div class="metric-lbl">Vectors</div></div>
+      <div class="metric-card accuracy"><div class="metric-val" style="color:{accuracy_color};">{accuracy_disp}</div><div class="metric-lbl">Accuracy</div></div>
       <div class="metric-card" style="grid-column:span 2"><div class="metric-val">{fmt_time(pt) if (show_stats and pt) else '—'}</div><div class="metric-lbl">Process Time</div></div>
-    </div>""", unsafe_allow_html=True)
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.48rem;color:rgba(0,200,255,0.2);margin-top:6px;letter-spacing:.06em;">
+      accuracy = retrieval confidence + your feedback
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
@@ -558,8 +557,7 @@ with st.sidebar:
 
     st.markdown('<span class="s-label">// Built by</span>', unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;
-      color:rgba(0,200,255,0.6);margin-bottom:10px;">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:rgba(0,200,255,0.6);margin-bottom:10px;">
       Sai Jyothi Gayathri Adabala
     </div>""", unsafe_allow_html=True)
 
@@ -572,67 +570,24 @@ with st.sidebar:
     cs = st.session_state.get("contact_show")
     if cs == "email":
         st.markdown("""
-        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
-          border-radius:8px;padding:10px 14px;">
-          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:rgba(0,200,255,0.75);letter-spacing:.04em;">
-            ✉ &nbsp;asjyothig@gmail.com</div>
+        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:8px;padding:10px 14px;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:rgba(0,200,255,0.75);">✉ asjyothig@gmail.com</div>
         </div>""", unsafe_allow_html=True)
     elif cs == "linkedin":
         st.markdown("""
-        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
-          border-radius:8px;padding:10px 14px;">
-          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
+        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:8px;padding:10px 14px;">
           <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank"
-             style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#00dcff;text-decoration:none;
-               display:block;border:1px solid rgba(0,200,255,0.35);border-radius:6px;padding:7px 10px;
-               text-align:center;background:rgba(0,200,255,0.06);">
+             style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#00dcff;text-decoration:none;display:block;border:1px solid rgba(0,200,255,0.35);border-radius:6px;padding:7px 10px;text-align:center;background:rgba(0,200,255,0.06);">
             → Open LinkedIn Profile ↗
           </a>
         </div>""", unsafe_allow_html=True)
 
     st.markdown("""
-    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;
-      color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;
-      border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">
+    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">
       CLAUDE · FAISS · SENTENCE-TRANSFORMERS
     </div>""", unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
-st.components.v1.html("""
-<script>
-(function(){
-  var STYLE_ID='sb-float-style',BTN_ID='sb-float-btn';
-  function getDoc(){return window.parent?window.parent.document:document;}
-  function ensureStyle(doc){
-    if(doc.getElementById(STYLE_ID))return;
-    var s=doc.createElement('style');s.id=STYLE_ID;
-    s.textContent=['@keyframes sbglow{0%,100%{box-shadow:0 0 14px rgba(0,200,255,.4),3px 0 10px rgba(0,200,255,.15)}50%{box-shadow:0 0 30px rgba(0,200,255,.85),3px 0 20px rgba(0,200,255,.4)}}',
-      '#'+BTN_ID+'{position:fixed!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;z-index:2147483647!important;width:26px!important;height:60px!important;background:rgba(0,8,24,0.95)!important;border:1.5px solid rgba(0,200,255,0.65)!important;border-left:none!important;border-radius:0 10px 10px 0!important;color:#00dcff!important;font-size:14px!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;animation:sbglow 2.2s ease-in-out infinite!important;outline:none!important;padding:0!important;}',
-      '#'+BTN_ID+':hover{background:rgba(0,200,255,0.28)!important;}'
-    ].join('');
-    doc.head.appendChild(s);
-  }
-  function ensureButton(doc){
-    if(doc.getElementById(BTN_ID))return;
-    var btn=doc.createElement('button');btn.id=BTN_ID;btn.title='Toggle Sidebar';btn.innerHTML='&#8942;';
-    btn.addEventListener('click',function(){
-      var targets=['[data-testid="stSidebarCollapseButton"] button','[data-testid="stSidebarCollapseButton"]','[data-testid="collapsedControl"] button','[data-testid="collapsedControl"]'];
-      for(var i=0;i<targets.length;i++){var el=doc.querySelector(targets[i]);if(el){el.click();return;}}
-      var sb=doc.querySelector('[data-testid="stSidebar"]');
-      if(sb){sb.style.display=(sb.style.display==='none')?'':'none';}
-    });
-    doc.body.appendChild(btn);
-  }
-  function init(){var doc=getDoc();ensureStyle(doc);ensureButton(doc);}
-  init();setTimeout(init,600);setTimeout(init,1800);
-  var doc=getDoc();
-  var observer=new MutationObserver(function(){if(!doc.getElementById(BTN_ID))ensureButton(doc);});
-  setTimeout(function(){observer.observe(doc.body,{childList:true,subtree:false});},800);
-})();
-</script>
-""", height=0, scrolling=False)
-
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
 
 if "index" not in st.session_state:
@@ -640,11 +595,14 @@ if "index" not in st.session_state:
 else:
     if "chat_display" not in st.session_state: st.session_state.chat_display = []
     if "messages" not in st.session_state: st.session_state.messages = []
+    if "feedback" not in st.session_state: st.session_state.feedback = {}
+    if "total_likes" not in st.session_state: st.session_state.total_likes = 0
+    if "total_dislikes" not in st.session_state: st.session_state.total_dislikes = 0
 
     st.components.v1.html(RAG_PIPELINE_HTML, height=82, scrolling=False)
     st.components.v1.html(CHAT_BANNER_HTML, height=44, scrolling=False)
 
-    for entry in st.session_state.chat_display:
+    for idx_e, entry in enumerate(st.session_state.chat_display):
         with st.chat_message(entry["role"]):
             st.markdown(entry["content"])
             side = "ts-right" if entry["role"]=="user" else "ts-left"
@@ -653,6 +611,36 @@ else:
             for img_data in entry.get("images",[]):
                 st.markdown(f'<div class="img-frame img-slide"><div class="img-frame-label"><span>// IMAGE {img_data["index"]+1}</span><span>PAGE {img_data["page"]}</span></div></div>', unsafe_allow_html=True)
                 st.image(base64.b64decode(img_data["b64"]))
+
+            # ── LIKE/DISLIKE on assistant messages ──
+            if entry["role"] == "assistant":
+                fb_key = f"fb_{idx_e}"
+                current_fb = st.session_state.feedback.get(fb_key, None)
+                conf = entry.get("confidence", 0)
+
+                col_l, col_d, col_conf = st.columns([1, 1, 6])
+                with col_l:
+                    like_style = "liked" if current_fb == "like" else ""
+                    if st.button("👍", key=f"like_{idx_e}", help="Helpful answer"):
+                        if current_fb != "like":
+                            if current_fb == "dislike":
+                                st.session_state.total_dislikes = max(0, st.session_state.total_dislikes - 1)
+                            st.session_state.feedback[fb_key] = "like"
+                            st.session_state.total_likes += 1
+                            st.rerun()
+                with col_d:
+                    if st.button("👎", key=f"dislike_{idx_e}", help="Not helpful"):
+                        if current_fb != "dislike":
+                            if current_fb == "like":
+                                st.session_state.total_likes = max(0, st.session_state.total_likes - 1)
+                            st.session_state.feedback[fb_key] = "dislike"
+                            st.session_state.total_dislikes += 1
+                            st.rerun()
+                with col_conf:
+                    if conf > 0:
+                        conf_color = "#00ff88" if conf >= 80 else "#00dcff" if conf >= 60 else "rgba(255,180,0,0.8)"
+                        fb_label = " · you liked this ✓" if current_fb == "like" else " · marked not helpful" if current_fb == "dislike" else ""
+                        st.markdown(f'<span style="font-family:Share Tech Mono,monospace;font-size:0.5rem;color:{conf_color};">confidence: {conf}%{fb_label}</span>', unsafe_allow_html=True)
 
     question = st.chat_input("Message PDF Bot…")
 
@@ -674,20 +662,22 @@ else:
         ranked    = sorted(zip(ce_scores, candidate_chunks), reverse=True)[:3]
         top_idxs  = [idx for _, (idx, _) in ranked]
         context   = "\n\n".join(ch for _, (_, ch) in ranked)
+        top_scores = [s for s, _ in ranked]
 
-        think_ph.markdown(retrieval_html([i+1 for i in top_idxs]), unsafe_allow_html=True)
+        # Compute confidence
+        confidence_pct = ce_scores_to_pct(top_scores)
+        st.session_state["last_retrieval_pct"] = confidence_pct
+
+        think_ph.markdown(retrieval_html([i+1 for i in top_idxs], confidence_pct), unsafe_allow_html=True)
         time.sleep(0.3)
         think_ph.empty()
 
-        # ── FIX 2: Images — only fetch from Claude when user explicitly asks ──
         images_to_show = []
         if is_image_request(question):
-            # Explicit image request → find by ordinal/number
             matched = find_matching_images(question, st.session_state.get("image_store", []))
             if matched:
                 img = matched[0]
                 if not img.get("described"):
-                    # NOW call Claude Vision (only on demand)
                     try:
                         resp = anthropic_client.messages.create(
                             model="claude-haiku-4-5-20251001", max_tokens=300,
@@ -701,10 +691,8 @@ else:
                     except: pass
                 images_to_show = matched
 
-        # ── FIX 3: Build expert-tutor system prompt using intro context ──────
         intro = st.session_state.get("intro_context", "")
         if not intro:
-            # fallback: grab from disk meta
             try:
                 with open(META_PATH,"rb") as f:
                     m = pickle.load(f)
@@ -712,13 +700,11 @@ else:
             except: pass
 
         if images_to_show:
-            st.session_state.messages.append({"role":"user","content":
-                f"Context:\n{context}\n\nQuestion: {question}\n\nNote: You are showing the user the image(s). Describe in 1-2 sentences."})
+            st.session_state.messages.append({"role":"user","content":f"Context:\n{context}\n\nQuestion: {question}\n\nNote: Describe the image in 1-2 sentences."})
             system_prompt = "You are a document assistant. Briefly describe what the image shows in 1-2 sentences."
             max_tok = 300
         else:
             st.session_state.messages.append({"role":"user","content":f"Context:\n{context}\n\nQuestion: {question}"})
-            # Expert tutor system prompt — grounded in the document's own intro
             system_prompt = f"""You are an expert tutor and analyst specialised in the content of this document.
 
 Here is an excerpt from the beginning of the document to understand its subject:
@@ -741,7 +727,11 @@ Based on this subject matter, act as a knowledgeable expert in this field. When 
         reply = response.content[0].text
         reply_time = local_time()
         st.session_state.messages.append({"role":"assistant","content":reply})
-        st.session_state.chat_display.append({"role":"assistant","content":reply,"images":images_to_show,"time":reply_time})
+        st.session_state.chat_display.append({
+            "role":"assistant","content":reply,
+            "images":images_to_show,"time":reply_time,
+            "confidence": confidence_pct,
+        })
 
         with st.chat_message("assistant"):
             st.markdown(reply)
@@ -749,3 +739,5 @@ Based on this subject matter, act as a knowledgeable expert in this field. When 
             for img_data in images_to_show:
                 st.markdown(f'<div class="img-frame img-slide"><div class="img-frame-label"><span>// IMAGE {img_data["index"]+1}</span><span>PAGE {img_data["page"]}</span></div></div>', unsafe_allow_html=True)
                 st.image(base64.b64decode(img_data["b64"]))
+
+        st.rerun()
