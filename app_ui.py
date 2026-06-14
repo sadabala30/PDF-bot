@@ -25,29 +25,36 @@ st.markdown("""
 .stToast,[class*="toast"],[class*="Toast"],
 [data-baseweb="notification"],[data-baseweb="toast"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}
 
-/* ── SIDEBAR COLLAPSE BUTTON — make it GLOWING & VISIBLE ── */
-[data-testid="stSidebarCollapseButton"]{
+/* ── SIDEBAR COLLAPSE BUTTON — force always visible ── */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="collapsedControl"]{
   display:flex!important;visibility:visible!important;opacity:1!important;
-  background:rgba(0,200,255,0.15)!important;
-  border:1.5px solid rgba(0,200,255,0.6)!important;
-  border-radius:0 10px 10px 0!important;
-  box-shadow:0 0 18px rgba(0,200,255,0.4),inset 0 0 8px rgba(0,200,255,0.1)!important;
-  animation:sidebtnpulse 2s ease-in-out infinite!important;
-  width:28px!important;height:60px!important;
+  position:fixed!important;left:0!important;top:50%!important;
+  transform:translateY(-50%)!important;z-index:99999!important;
+  width:32px!important;height:72px!important;
+  background:rgba(0,200,255,0.18)!important;
+  border:2px solid #00dcff!important;
+  border-left:none!important;
+  border-radius:0 14px 14px 0!important;
+  box-shadow:0 0 28px rgba(0,200,255,0.6),4px 0 20px rgba(0,200,255,0.3)!important;
   align-items:center!important;justify-content:center!important;
+  cursor:pointer!important;
+  animation:sidebtnpulse 2s ease-in-out infinite!important;
 }
-[data-testid="stSidebarCollapseButton"]:hover{
-  background:rgba(0,200,255,0.3)!important;
-  box-shadow:0 0 28px rgba(0,200,255,0.7)!important;
+[data-testid="stSidebarCollapseButton"]:hover,
+[data-testid="collapsedControl"]:hover{
+  background:rgba(0,200,255,0.38)!important;
+  box-shadow:0 0 40px rgba(0,200,255,0.9)!important;
 }
-[data-testid="stSidebarCollapseButton"] svg{
+[data-testid="stSidebarCollapseButton"] svg,
+[data-testid="collapsedControl"] svg{
   color:#00dcff!important;
-  filter:drop-shadow(0 0 5px #00dcff)!important;
-  width:16px!important;height:16px!important;
+  filter:drop-shadow(0 0 6px #00dcff)!important;
+  width:18px!important;height:18px!important;
 }
 @keyframes sidebtnpulse{
-  0%,100%{box-shadow:0 0 12px rgba(0,200,255,0.3);}
-  50%{box-shadow:0 0 26px rgba(0,200,255,0.7),0 0 40px rgba(0,200,255,0.3);}
+  0%,100%{box-shadow:0 0 18px rgba(0,200,255,0.4),4px 0 14px rgba(0,200,255,0.2);}
+  50%{box-shadow:0 0 36px rgba(0,200,255,0.85),4px 0 28px rgba(0,200,255,0.5);}
 }
 
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
@@ -561,6 +568,68 @@ with st.sidebar:
     </div>""", unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
+# ── INJECT PERSISTENT SIDEBAR TOGGLE (works even when sidebar is hidden) ──
+st.markdown("""
+<script>
+(function(){
+  function injectToggle(){
+    var doc = window.parent ? window.parent.document : document;
+
+    // Don't add twice
+    if(doc.getElementById('sb-float-btn')) return;
+
+    var btn = doc.createElement('button');
+    btn.id = 'sb-float-btn';
+    btn.innerHTML = '&#9776;';
+    btn.title = 'Toggle Sidebar';
+    btn.style.cssText = [
+      'position:fixed','left:0','top:50%','transform:translateY(-50%)',
+      'z-index:2147483647','width:32px','height:72px',
+      'background:rgba(0,200,255,0.18)',
+      'border:2px solid #00dcff','border-left:none',
+      'border-radius:0 14px 14px 0',
+      'color:#00dcff','font-size:18px','cursor:pointer',
+      'box-shadow:0 0 28px rgba(0,200,255,0.6)',
+      'animation:sbfloat 2s ease-in-out infinite',
+      'display:flex','align-items:center','justify-content:center',
+      'transition:background 0.2s'
+    ].join('!important;') + '!important';
+
+    // Pulse animation
+    var style = doc.createElement('style');
+    style.textContent = '@keyframes sbfloat{0%,100%{box-shadow:0 0 18px rgba(0,200,255,0.4)}50%{box-shadow:0 0 40px rgba(0,200,255,0.9),0 0 60px rgba(0,200,255,0.3)}}' +
+      '#sb-float-btn:hover{background:rgba(0,200,255,0.38)!important;box-shadow:0 0 50px rgba(0,200,255,1)!important;}';
+    doc.head.appendChild(style);
+
+    btn.onclick = function(){
+      // Try clicking the native Streamlit sidebar button
+      var nativeBtn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                      doc.querySelector('[data-testid="stSidebarCollapseButton"]') ||
+                      doc.querySelector('[data-testid="collapsedControl"] button') ||
+                      doc.querySelector('[data-testid="collapsedControl"]');
+      if(nativeBtn){ nativeBtn.click(); return; }
+      // Fallback: toggle sidebar visibility directly
+      var sb = doc.querySelector('[data-testid="stSidebar"]');
+      if(sb){
+        sb.style.display = sb.style.display==='none'?'':'none';
+      }
+    };
+
+    doc.body.appendChild(btn);
+  }
+
+  // Run now and after any DOM changes
+  setTimeout(injectToggle, 800);
+  setTimeout(injectToggle, 2000);
+  var obs = new MutationObserver(function(){ injectToggle(); });
+  setTimeout(function(){
+    var doc = window.parent ? window.parent.document : document;
+    obs.observe(doc.body, {childList:true, subtree:false});
+  }, 1000);
+})();
+</script>
+""", unsafe_allow_html=True)
+
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
 
 if "index" not in st.session_state:
