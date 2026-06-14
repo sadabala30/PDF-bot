@@ -25,41 +25,42 @@ st.markdown("""
 .stToast,[class*="toast"],[class*="Toast"],
 [data-baseweb="notification"],[data-baseweb="toast"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}
 
-/* ── SIDEBAR COLLAPSE BUTTON — force always visible ── */
+html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
+[data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;min-width:260px!important;}
+[data-testid="stSidebar"]>div{padding-top:0!important;}
+
+/* ── SIDEBAR TOGGLE BUTTON — always visible, fixed to left edge ── */
 [data-testid="stSidebarCollapseButton"],
 [data-testid="collapsedControl"]{
   display:flex!important;visibility:visible!important;opacity:1!important;
   position:fixed!important;left:0!important;top:50%!important;
   transform:translateY(-50%)!important;z-index:99999!important;
-  width:32px!important;height:72px!important;
-  background:rgba(0,200,255,0.18)!important;
-  border:2px solid #00dcff!important;
+  width:28px!important;height:64px!important;
+  background:rgba(0,10,30,0.95)!important;
+  border:1.5px solid rgba(0,200,255,0.6)!important;
   border-left:none!important;
-  border-radius:0 14px 14px 0!important;
-  box-shadow:0 0 28px rgba(0,200,255,0.6),4px 0 20px rgba(0,200,255,0.3)!important;
+  border-radius:0 12px 12px 0!important;
+  box-shadow:0 0 20px rgba(0,200,255,0.5),4px 0 16px rgba(0,200,255,0.2)!important;
   align-items:center!important;justify-content:center!important;
   cursor:pointer!important;
-  animation:sidebtnpulse 2s ease-in-out infinite!important;
+  animation:sbpulse 2.2s ease-in-out infinite!important;
+  transition:background 0.2s!important;
 }
 [data-testid="stSidebarCollapseButton"]:hover,
 [data-testid="collapsedControl"]:hover{
-  background:rgba(0,200,255,0.38)!important;
-  box-shadow:0 0 40px rgba(0,200,255,0.9)!important;
+  background:rgba(0,200,255,0.25)!important;
+  box-shadow:0 0 36px rgba(0,200,255,0.9),4px 0 24px rgba(0,200,255,0.5)!important;
 }
 [data-testid="stSidebarCollapseButton"] svg,
 [data-testid="collapsedControl"] svg{
   color:#00dcff!important;
-  filter:drop-shadow(0 0 6px #00dcff)!important;
-  width:18px!important;height:18px!important;
+  filter:drop-shadow(0 0 5px #00dcff)!important;
+  width:16px!important;height:16px!important;
 }
-@keyframes sidebtnpulse{
-  0%,100%{box-shadow:0 0 18px rgba(0,200,255,0.4),4px 0 14px rgba(0,200,255,0.2);}
-  50%{box-shadow:0 0 36px rgba(0,200,255,0.85),4px 0 28px rgba(0,200,255,0.5);}
+@keyframes sbpulse{
+  0%,100%{box-shadow:0 0 14px rgba(0,200,255,0.35),4px 0 10px rgba(0,200,255,0.15);}
+  50%{box-shadow:0 0 32px rgba(0,200,255,0.8),4px 0 22px rgba(0,200,255,0.45);}
 }
-
-html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
-[data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;min-width:260px!important;}
-[data-testid="stSidebar"]>div{padding-top:0!important;}
 
 [data-testid="stFileUploader"]{background:rgba(0,10,30,0.6)!important;border:2px dashed rgba(0,200,255,0.45)!important;border-radius:12px!important;transition:all 0.3s!important;box-shadow:0 0 18px rgba(0,200,255,0.12),inset 0 0 18px rgba(0,200,255,0.04)!important;}
 [data-testid="stFileUploader"]:hover{border-color:rgba(0,200,255,0.85)!important;box-shadow:0 0 32px rgba(0,200,255,0.28),inset 0 0 24px rgba(0,200,255,0.08)!important;}
@@ -84,14 +85,38 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#002a40,#005580)!important;border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#1a0050,#4400cc)!important;border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;}
 
-/* ── CHAT INPUT — NO RED BORDER EVER ── */
+/* ══════════════════════════════════════════════
+   CHAT INPUT — KILL RED BORDER COMPLETELY
+   The red comes from [data-baseweb="base-input"]
+   which Streamlit wraps around the textarea.
+   We nuke every possible source.
+══════════════════════════════════════════════ */
 [data-testid="stChatInput"]{
   background:rgba(0,2,15,0.96)!important;
   border-top:1px solid rgba(0,200,255,0.14)!important;
+  border:none!important;
   padding:12px 20px!important;
   outline:none!important;
   box-shadow:none!important;
 }
+/* The outer div Streamlit injects */
+[data-testid="stChatInput"]>div{
+  border:none!important;
+  outline:none!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+/* BaseWeb wrapper — this is what goes red */
+[data-testid="stChatInput"] [data-baseweb="base-input"],
+[data-testid="stChatInput"] [data-baseweb="textarea"],
+[data-testid="stChatInput"] [class*="InputContainer"],
+[data-testid="stChatInput"] [class*="BaseInput"]{
+  border:none!important;
+  outline:none!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+/* The actual textarea pill */
 [data-testid="stChatInput"] textarea{
   background:rgba(0,200,255,0.04)!important;
   border:1.5px solid rgba(0,200,255,0.3)!important;
@@ -106,7 +131,7 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 }
 [data-testid="stChatInput"] textarea:focus,
 [data-testid="stChatInput"] textarea:focus-visible,
-[data-testid="stChatInput"] textarea:active{
+[data-testid="stChatInput"] textarea:focus-within{
   border:1.5px solid rgba(0,200,255,0.8)!important;
   outline:none!important;
   box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;
@@ -116,14 +141,17 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
 [data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.3)!important;box-shadow:0 0 16px rgba(0,200,255,0.4)!important;}
 
-/* Kill ALL red/default focus rings sitewide */
+/* Nuclear option: kill ALL red/orange/default outlines sitewide */
 *:focus,*:focus-visible,*:focus-within{
   outline:none!important;
-  box-shadow:none!important;
 }
-/* Re-apply ONLY cyan glow on the textarea specifically */
-[data-testid="stChatInput"] textarea:focus{
-  box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;
+/* BaseWeb uses internal state classes for the red ring — kill them all */
+[data-baseweb="base-input"]:focus-within,
+[data-baseweb="base-input"]:focus,
+[data-baseweb="textarea"]:focus-within{
+  border-color:transparent!important;
+  box-shadow:none!important;
+  outline:none!important;
 }
 
 ::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.25);border-radius:2px;}
@@ -509,7 +537,6 @@ with st.sidebar:
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
-    # ── BUILT BY — Streamlit native buttons so dropdowns actually work ──
     st.markdown('<span class="s-label">// Built by</span>', unsafe_allow_html=True)
     st.markdown("""
     <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;
@@ -527,38 +554,23 @@ with st.sidebar:
     if cs == "email":
         st.markdown("""
         <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
-          border-radius:8px;padding:10px 14px;animation:dropIn 0.2s ease;">
-          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;
-            letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;
-            color:rgba(0,200,255,0.75);letter-spacing:.04em;">
-            ✉ &nbsp;asjyothig@gmail.com
-          </div>
-          <div style="font-size:0.46rem;color:rgba(0,200,255,0.22);margin-top:5px;
-            font-family:'Share Tech Mono',monospace;letter-spacing:.08em;">
-            // copy and email anytime
-          </div>
-        </div>
-        <style>@keyframes dropIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}</style>
-        """, unsafe_allow_html=True)
+          border-radius:8px;padding:10px 14px;">
+          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:rgba(0,200,255,0.75);letter-spacing:.04em;">
+            ✉ &nbsp;asjyothig@gmail.com</div>
+        </div>""", unsafe_allow_html=True)
     elif cs == "linkedin":
         st.markdown("""
         <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
-          border-radius:8px;padding:10px 14px;animation:dropIn 0.2s ease;">
-          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;
-            letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
-          <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/"
-             target="_blank"
-             style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#00dcff;
-               text-decoration:none;display:block;
-               border:1px solid rgba(0,200,255,0.35);border-radius:6px;
-               padding:7px 10px;text-align:center;background:rgba(0,200,255,0.06);
-               transition:all .2s;">
+          border-radius:8px;padding:10px 14px;">
+          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
+          <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank"
+             style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#00dcff;text-decoration:none;
+               display:block;border:1px solid rgba(0,200,255,0.35);border-radius:6px;padding:7px 10px;
+               text-align:center;background:rgba(0,200,255,0.06);">
             → Open LinkedIn Profile ↗
           </a>
-        </div>
-        <style>@keyframes dropIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}</style>
-        """, unsafe_allow_html=True)
+        </div>""", unsafe_allow_html=True)
 
     st.markdown("""
     <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;
@@ -568,67 +580,99 @@ with st.sidebar:
     </div>""", unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
-# ── INJECT PERSISTENT SIDEBAR TOGGLE (works even when sidebar is hidden) ──
-st.markdown("""
+# Floating sidebar toggle button — injected via JS into the parent page.
+# Works on desktop AND mobile. Persists even when sidebar is fully collapsed.
+st.components.v1.html("""
 <script>
 (function(){
-  function injectToggle(){
-    var doc = window.parent ? window.parent.document : document;
+  var STYLE_ID = 'sb-float-style';
+  var BTN_ID   = 'sb-float-btn';
 
-    // Don't add twice
-    if(doc.getElementById('sb-float-btn')) return;
+  function getDoc(){ return window.parent ? window.parent.document : document; }
 
+  function ensureStyle(doc){
+    if(doc.getElementById(STYLE_ID)) return;
+    var s = doc.createElement('style');
+    s.id = STYLE_ID;
+    s.textContent = [
+      '@keyframes sbglow{0%,100%{box-shadow:0 0 14px rgba(0,200,255,.4),3px 0 10px rgba(0,200,255,.15)}',
+      '50%{box-shadow:0 0 30px rgba(0,200,255,.85),3px 0 20px rgba(0,200,255,.4)}}',
+      '#'+BTN_ID+'{',
+        'position:fixed!important;',
+        'left:0!important;top:50%!important;',
+        'transform:translateY(-50%)!important;',
+        'z-index:2147483647!important;',
+        'width:26px!important;height:60px!important;',
+        'background:rgba(0,8,24,0.95)!important;',
+        'border:1.5px solid rgba(0,200,255,0.65)!important;',
+        'border-left:none!important;',
+        'border-radius:0 10px 10px 0!important;',
+        'color:#00dcff!important;',
+        'font-size:14px!important;',
+        'cursor:pointer!important;',
+        'display:flex!important;align-items:center!important;justify-content:center!important;',
+        'animation:sbglow 2.2s ease-in-out infinite!important;',
+        'transition:background 0.2s!important;',
+        'outline:none!important;',
+        'padding:0!important;',
+      '}',
+      '#'+BTN_ID+':hover{background:rgba(0,200,255,0.28)!important;}'
+    ].join('');
+    doc.head.appendChild(s);
+  }
+
+  function ensureButton(doc){
+    if(doc.getElementById(BTN_ID)) return;
     var btn = doc.createElement('button');
-    btn.id = 'sb-float-btn';
-    btn.innerHTML = '&#9776;';
+    btn.id = BTN_ID;
     btn.title = 'Toggle Sidebar';
-    btn.style.cssText = [
-      'position:fixed','left:0','top:50%','transform:translateY(-50%)',
-      'z-index:2147483647','width:32px','height:72px',
-      'background:rgba(0,200,255,0.18)',
-      'border:2px solid #00dcff','border-left:none',
-      'border-radius:0 14px 14px 0',
-      'color:#00dcff','font-size:18px','cursor:pointer',
-      'box-shadow:0 0 28px rgba(0,200,255,0.6)',
-      'animation:sbfloat 2s ease-in-out infinite',
-      'display:flex','align-items:center','justify-content:center',
-      'transition:background 0.2s'
-    ].join('!important;') + '!important';
+    btn.innerHTML = '&#8942;'; // ⋮ vertical dots
+    btn.setAttribute('aria-label','Toggle sidebar');
 
-    // Pulse animation
-    var style = doc.createElement('style');
-    style.textContent = '@keyframes sbfloat{0%,100%{box-shadow:0 0 18px rgba(0,200,255,0.4)}50%{box-shadow:0 0 40px rgba(0,200,255,0.9),0 0 60px rgba(0,200,255,0.3)}}' +
-      '#sb-float-btn:hover{background:rgba(0,200,255,0.38)!important;box-shadow:0 0 50px rgba(0,200,255,1)!important;}';
-    doc.head.appendChild(style);
-
-    btn.onclick = function(){
-      // Try clicking the native Streamlit sidebar button
-      var nativeBtn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
-                      doc.querySelector('[data-testid="stSidebarCollapseButton"]') ||
-                      doc.querySelector('[data-testid="collapsedControl"] button') ||
-                      doc.querySelector('[data-testid="collapsedControl"]');
-      if(nativeBtn){ nativeBtn.click(); return; }
-      // Fallback: toggle sidebar visibility directly
+    btn.addEventListener('click', function(){
+      // Strategy 1: click Streamlit's native collapse/expand button
+      var targets = [
+        '[data-testid="stSidebarCollapseButton"] button',
+        '[data-testid="stSidebarCollapseButton"]',
+        '[data-testid="collapsedControl"] button',
+        '[data-testid="collapsedControl"]',
+      ];
+      for(var i=0;i<targets.length;i++){
+        var el = doc.querySelector(targets[i]);
+        if(el){ el.click(); return; }
+      }
+      // Strategy 2: toggle sidebar display directly
       var sb = doc.querySelector('[data-testid="stSidebar"]');
       if(sb){
-        sb.style.display = sb.style.display==='none'?'':'none';
+        sb.style.display = (sb.style.display === 'none') ? '' : 'none';
       }
-    };
+    });
 
     doc.body.appendChild(btn);
   }
 
-  // Run now and after any DOM changes
-  setTimeout(injectToggle, 800);
-  setTimeout(injectToggle, 2000);
-  var obs = new MutationObserver(function(){ injectToggle(); });
+  function init(){
+    var doc = getDoc();
+    ensureStyle(doc);
+    ensureButton(doc);
+  }
+
+  // Run immediately + after Streamlit rehydrates
+  init();
+  setTimeout(init, 600);
+  setTimeout(init, 1800);
+
+  // Watch for Streamlit re-renders that might remove the button
+  var doc = getDoc();
+  var observer = new MutationObserver(function(mutations){
+    if(!doc.getElementById(BTN_ID)) ensureButton(doc);
+  });
   setTimeout(function(){
-    var doc = window.parent ? window.parent.document : document;
-    obs.observe(doc.body, {childList:true, subtree:false});
-  }, 1000);
+    observer.observe(doc.body, {childList: true, subtree: false});
+  }, 800);
 })();
 </script>
-""", unsafe_allow_html=True)
+""", height=0, scrolling=False)
 
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
 
