@@ -16,7 +16,6 @@ load_dotenv()
 
 st.set_page_config(page_title="PDF BOT", page_icon="⬡", layout="wide", initial_sidebar_state="expanded")
 
-# ── GLOBAL CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap');
@@ -25,31 +24,96 @@ st.markdown("""
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
 [data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;}
 [data-testid="stSidebar"]>div{padding-top:0!important;}
+
+/* ── SIDEBAR TOGGLE — always visible glowing tab ── */
+[data-testid="stSidebarCollapseButton"]{
+  position:fixed!important;
+  top:50%!important;
+  left:0!important;
+  transform:translateY(-50%)!important;
+  z-index:9999!important;
+  background:rgba(0,200,255,0.12)!important;
+  border:1px solid rgba(0,200,255,0.5)!important;
+  border-left:none!important;
+  border-radius:0 8px 8px 0!important;
+  width:22px!important;
+  height:60px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-shadow:4px 0 20px rgba(0,200,255,0.25)!important;
+  animation:tabpulse 2.5s ease-in-out infinite!important;
+  cursor:pointer!important;
+}
+[data-testid="stSidebarCollapseButton"]:hover{
+  background:rgba(0,200,255,0.3)!important;
+  box-shadow:4px 0 30px rgba(0,200,255,0.5)!important;
+}
+[data-testid="stSidebarCollapseButton"] svg{
+  color:#00dcff!important;
+  width:12px!important;
+  height:12px!important;
+}
+@keyframes tabpulse{0%,100%{box-shadow:4px 0 14px rgba(0,200,255,0.2);}50%{box-shadow:4px 0 28px rgba(0,200,255,0.5);}}
+
 [data-testid="stFileUploader"]{background:rgba(0,200,255,0.03)!important;border:1px solid rgba(0,200,255,0.2)!important;border-radius:8px!important;}
 [data-testid="stFileUploader"]:hover{border-color:rgba(0,200,255,0.6)!important;}
 [data-testid="stFileUploader"] label{color:rgba(0,200,255,0.6)!important;font-family:'Share Tech Mono',monospace!important;font-size:0.72rem!important;}
 [data-testid="stFileUploader"] section{border:none!important;background:transparent!important;}
 [data-testid="stFileUploader"] button{border-color:rgba(0,200,255,0.4)!important;color:#00dcff!important;background:transparent!important;}
+
 .stButton>button{background:transparent!important;border:1px solid rgba(0,200,255,0.4)!important;color:#00dcff!important;border-radius:6px!important;font-family:'Share Tech Mono',monospace!important;font-size:0.7rem!important;letter-spacing:0.1em!important;width:100%!important;padding:9px!important;text-transform:uppercase!important;transition:all 0.25s!important;animation:pulsebtn 2.2s ease-in-out infinite!important;}
 .stButton>button:hover{background:rgba(0,200,255,0.12)!important;border-color:#00dcff!important;box-shadow:0 0 22px rgba(0,200,255,0.3)!important;}
 @keyframes pulsebtn{0%,100%{box-shadow:0 0 8px rgba(0,200,255,0.15)}50%{box-shadow:0 0 22px rgba(0,200,255,0.38)}}
+
 .stProgress>div>div{background:linear-gradient(90deg,#00dcff,#00ff88)!important;}
 .stProgress>div{background:rgba(0,200,255,0.08)!important;border-radius:0!important;}
 .stSuccess{background:rgba(0,255,136,0.06)!important;border:1px solid rgba(0,255,136,0.2)!important;border-radius:6px!important;color:#00ff88!important;font-family:'Share Tech Mono',monospace!important;font-size:0.75rem!important;}
 .block-container{padding:0!important;max-width:100%!important;}
+
+/* ── WHATSAPP-STYLE CHAT ── */
 [data-testid="stChatMessage"]{background:transparent!important;border:none!important;padding:3px 20px!important;margin-bottom:4px!important;}
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"])>div:last-child{background:rgba(0,18,38,0.92)!important;border:1px solid rgba(0,200,255,0.18)!important;border-radius:2px 18px 18px 18px!important;padding:13px 17px!important;font-size:0.88rem!important;line-height:1.75!important;color:#cce8ff!important;max-width:68%!important;}
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"])>div:last-child{background:linear-gradient(135deg,rgba(0,100,200,0.4),rgba(60,0,180,0.45))!important;border:1px solid rgba(80,160,255,0.35)!important;border-radius:18px 2px 18px 18px!important;padding:13px 17px!important;font-size:0.88rem!important;line-height:1.75!important;color:#e8f6ff!important;max-width:68%!important;}
+
+/* Bot — left */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"])>div:last-child{
+  background:rgba(0,18,38,0.92)!important;border:1px solid rgba(0,200,255,0.18)!important;
+  border-radius:2px 18px 18px 18px!important;padding:13px 17px!important;
+  font-size:0.88rem!important;line-height:1.75!important;color:#cce8ff!important;max-width:65%!important;
+  box-shadow:0 3px 16px rgba(0,200,255,0.07)!important;
+}
+
+/* User — right */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"])>div:last-child{
+  background:linear-gradient(135deg,rgba(0,100,200,0.4),rgba(60,0,180,0.45))!important;
+  border:1px solid rgba(80,160,255,0.35)!important;
+  border-radius:18px 2px 18px 18px!important;padding:13px 17px!important;
+  font-size:0.88rem!important;line-height:1.75!important;color:#e8f6ff!important;max-width:65%!important;
+  box-shadow:0 3px 16px rgba(80,120,255,0.15)!important;
+}
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]){flex-direction:row-reverse!important;}
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#002a40,#005580)!important;border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;}
-[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{background:linear-gradient(135deg,#1a0050,#4400cc)!important;border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;}
+
+/* Avatars */
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) [data-testid*="Avatar"]{
+  background:linear-gradient(135deg,#002a40,#005580)!important;
+  border:2px solid rgba(0,200,255,0.55)!important;box-shadow:0 0 12px rgba(0,200,255,0.3)!important;border-radius:50%!important;
+}
+[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) [data-testid*="Avatar"]{
+  background:linear-gradient(135deg,#1a0050,#4400cc)!important;
+  border:2px solid rgba(160,80,255,0.6)!important;box-shadow:0 0 12px rgba(140,60,255,0.3)!important;border-radius:50%!important;
+}
+
+/* ── CHAT INPUT — blue glow only ── */
 [data-testid="stChatInput"]{background:rgba(0,2,15,0.96)!important;border-top:1px solid rgba(0,200,255,0.14)!important;padding:12px 20px!important;}
-[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.28)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;}
-[data-testid="stChatInput"] textarea:focus{border-color:rgba(0,210,255,0.85)!important;box-shadow:0 0 30px rgba(0,200,255,0.25)!important;outline:none!important;}
+[data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.28)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;}
+[data-testid="stChatInput"] textarea:focus{border-color:rgba(0,210,255,0.85)!important;box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 30px rgba(0,200,255,0.2)!important;outline:none!important;}
+[data-testid="stChatInput"] textarea:focus-visible{outline:none!important;}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
 [data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
-::-webkit-scrollbar{width:3px;height:3px;}
-::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.25);border-radius:2px;}
+*:focus{outline:none!important;}
+
+::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:rgba(0,200,255,0.25);border-radius:2px;}
+
+/* ── SIDEBAR UTILS ── */
 .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
 .metric-card{background:rgba(0,200,255,0.03);border:1px solid rgba(0,200,255,0.1);border-radius:6px;padding:10px 8px;text-align:center;transition:all 0.3s;}
 .metric-card:hover{border-color:rgba(0,200,255,0.35);background:rgba(0,200,255,0.06);}
@@ -60,11 +124,14 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 .s-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:.18em;color:rgba(0,200,255,0.28);text-transform:uppercase;margin-bottom:6px;display:block;}
 .ts{font-family:'Share Tech Mono',monospace;font-size:0.57rem;color:rgba(0,200,255,0.2);margin-top:5px;display:block;}
 .ts-right{text-align:right;}.ts-left{text-align:left;}
-.sug-bar{display:flex;gap:7px;align-items:center;padding:7px 20px;border-bottom:1px solid rgba(0,200,255,0.07);background:rgba(0,2,14,0.8);overflow-x:auto;}
-.sug-prefix{font-family:'Share Tech Mono',monospace;font-size:0.5rem;color:rgba(0,200,255,0.3);letter-spacing:.14em;white-space:nowrap;}
-.sug-tag{font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.38);border:1px solid rgba(0,200,255,0.14);padding:3px 10px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:all 0.2s;animation:taganim 3s ease-in-out infinite;}
-.sug-tag:hover{color:#00dcff;border-color:rgba(0,200,255,0.6);background:rgba(0,200,255,0.08);}
-@keyframes taganim{0%,100%{opacity:.38}50%{opacity:.9;border-color:rgba(0,200,255,.42)}}
+
+/* ── IMAGE FRAME ── */
+.img-frame{border:1px solid rgba(0,200,255,0.2);border-radius:8px;overflow:hidden;margin:10px 0;}
+.img-frame-label{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.5);padding:6px 12px;border-bottom:1px solid rgba(0,200,255,0.1);letter-spacing:.1em;display:flex;justify-content:space-between;}
+.img-slide{animation:slideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;opacity:0;transform:translateY(20px);}
+@keyframes slideIn{to{opacity:1;transform:translateY(0)}}
+
+/* ── THINKING ANIMATION ── */
 .claude-thinking{font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:rgba(0,200,255,0.5);padding:10px 14px;background:rgba(0,18,38,0.6);border:1px solid rgba(0,200,255,0.12);border-radius:8px;margin:4px 20px;line-height:2;}
 .think-line{animation:thinkfade 1.2s ease-in-out infinite;}
 .think-line:nth-child(2){animation-delay:.2s}.think-line:nth-child(3){animation-delay:.4s}
@@ -75,14 +142,55 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 .rc-line{animation:rcfade 0.4s ease forwards;opacity:0;font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.4);line-height:1.9;}
 .rc-line:nth-child(2){animation-delay:.15s}.rc-line:nth-child(3){animation-delay:.3s}
 @keyframes rcfade{to{opacity:1}}
-.img-frame{border:1px solid rgba(0,200,255,0.2);border-radius:8px;overflow:hidden;margin:10px 0;}
-.img-frame-label{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.5);padding:6px 12px;border-bottom:1px solid rgba(0,200,255,0.1);letter-spacing:.1em;display:flex;justify-content:space-between;}
-.img-slide{animation:slideIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;opacity:0;transform:translateY(20px);}
-@keyframes slideIn{to{opacity:1;transform:translateY(0)}}
+
+/* ── SUGGESTION BAR ── */
+.sug-bar{display:flex;gap:7px;align-items:center;padding:7px 20px;border-bottom:1px solid rgba(0,200,255,0.07);background:rgba(0,2,14,0.85);overflow-x:auto;flex-wrap:nowrap;}
+.sug-prefix{font-family:'Share Tech Mono',monospace;font-size:0.5rem;color:rgba(0,200,255,0.3);letter-spacing:.14em;white-space:nowrap;}
+.sug-tag{font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.5);border:1px solid rgba(0,200,255,0.2);padding:4px 12px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:all 0.2s;background:rgba(0,200,255,0.03);}
+.sug-tag:hover{color:#00dcff;border-color:rgba(0,200,255,0.7);background:rgba(0,200,255,0.1);box-shadow:0 0 10px rgba(0,200,255,0.2);}
 </style>
 """, unsafe_allow_html=True)
 
-# ── HERO (from your HTML file) ────────────────────────────────────────────────
+# ── SIDEBAR OPEN ARROW (always visible when sidebar is collapsed) ──────────────
+# Inject a persistent floating button via components for when sidebar is hidden
+SIDEBAR_OPEN_BTN = """
+<style>
+body{margin:0;background:transparent;}
+#sob{
+  position:fixed;top:50%;left:0;transform:translateY(-50%);
+  z-index:99999;
+  width:24px;height:64px;
+  background:rgba(0,200,255,0.12);
+  border:1px solid rgba(0,200,255,0.55);
+  border-left:none;
+  border-radius:0 10px 10px 0;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  box-shadow:4px 0 20px rgba(0,200,255,0.3);
+  animation:sobpulse 2.5s ease-in-out infinite;
+  font-size:11px;color:#00dcff;
+  text-align:center;
+  user-select:none;
+  transition:all 0.2s;
+}
+#sob:hover{background:rgba(0,200,255,0.28);box-shadow:4px 0 30px rgba(0,200,255,0.55);}
+@keyframes sobpulse{0%,100%{box-shadow:4px 0 14px rgba(0,200,255,0.2);}50%{box-shadow:4px 0 30px rgba(0,200,255,0.55);}}
+</style>
+<div id="sob" onclick="openSidebar()" title="Open sidebar">▶</div>
+<script>
+function openSidebar(){
+  var doc=window.parent.document;
+  // try collapse button (it toggles)
+  var btn=doc.querySelector('[data-testid="stSidebarCollapseButton"]');
+  if(btn){btn.click();return;}
+  // fallback: look for any sidebar toggle
+  var btns=doc.querySelectorAll('button');
+  for(var b of btns){if(b.getAttribute('aria-label')||''.toLowerCase().includes('sidebar')){b.click();return;}}
+}
+</script>
+"""
+
+# ── HERO ──────────────────────────────────────────────────────────────────────
 HERO_HTML = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
@@ -91,8 +199,8 @@ HERO_HTML = """
 #hero-canvas,#particle-canvas{position:absolute;inset:0;width:100%;height:100%}
 .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,200,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.03) 1px,transparent 1px);background-size:44px 44px}
 .hero-vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 20%,rgba(2,2,8,.85) 100%)}
-.hero-corners span{position:absolute;width:30px;height:30px}
 .hero-corners{position:absolute;inset:0;pointer-events:none}
+.hero-corners span{position:absolute;width:30px;height:30px}
 .tl{top:0;left:0;border-top:1px solid rgba(0,200,255,.45);border-left:1px solid rgba(0,200,255,.45)}
 .tr{top:0;right:0;border-top:1px solid rgba(0,200,255,.45);border-right:1px solid rgba(0,200,255,.45)}
 .bl{bottom:0;left:0;border-bottom:1px solid rgba(0,200,255,.45);border-left:1px solid rgba(0,200,255,.45)}
@@ -128,13 +236,7 @@ HERO_HTML = """
   setInterval(tick,1000);tick();
   var hc=document.getElementById('hero-canvas'),hctx=hc.getContext('2d'),pc=document.getElementById('particle-canvas'),pctx=pc.getContext('2d'),hero=document.getElementById('hero'),W,H,cols=[],pts=[],chars='01アイウエオカキクサシスタチツテトナニネノ',FS=13;
   function resz(){W=hc.width=pc.width=hero.offsetWidth;H=hc.height=pc.height=hero.offsetHeight;cols=[];var n=Math.floor(W/FS);for(var i=0;i<n;i++)cols.push({y:Math.random()*H,sp:Math.random()*1.4+0.3,br:Math.random()>.82,tr:Math.floor(Math.random()*8)+4});pts=[];for(var i=0;i<55;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,r:Math.random()*1.8+.4,a:Math.random()*.5+.15});}
-  function loop(){
-    hctx.fillStyle='rgba(2,2,8,0.16)';hctx.fillRect(0,0,W,H);hctx.font=FS+'px monospace';
-    cols.forEach(function(c,i){var ch=chars[Math.floor(Math.random()*chars.length)];hctx.fillStyle=c.br?'rgba(200,240,255,0.95)':'rgba(0,180,255,0.14)';hctx.fillText(ch,i*FS,c.y);c.y+=c.sp;if(c.y>H+FS){c.y=-FS*c.tr;c.br=Math.random()>.82;}});
-    pctx.clearRect(0,0,W,H);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);pctx.fillStyle='rgba(0,220,255,'+p.a+')';pctx.fill();});
-    for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){var d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);if(d<90){pctx.beginPath();pctx.moveTo(pts[i].x,pts[i].y);pctx.lineTo(pts[j].x,pts[j].y);pctx.strokeStyle='rgba(0,180,255,'+(0.12*(1-d/90))+')';pctx.lineWidth=0.5;pctx.stroke();}}
-    requestAnimationFrame(loop);
-  }
+  function loop(){hctx.fillStyle='rgba(2,2,8,0.16)';hctx.fillRect(0,0,W,H);hctx.font=FS+'px monospace';cols.forEach(function(c,i){var ch=chars[Math.floor(Math.random()*chars.length)];hctx.fillStyle=c.br?'rgba(200,240,255,0.95)':'rgba(0,180,255,0.14)';hctx.fillText(ch,i*FS,c.y);c.y+=c.sp;if(c.y>H+FS){c.y=-FS*c.tr;c.br=Math.random()>.82;}});pctx.clearRect(0,0,W,H);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);pctx.fillStyle='rgba(0,220,255,'+p.a+')';pctx.fill();});for(var i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){var d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);if(d<90){pctx.beginPath();pctx.moveTo(pts[i].x,pts[i].y);pctx.lineTo(pts[j].x,pts[j].y);pctx.strokeStyle='rgba(0,180,255,'+(0.12*(1-d/90))+')';pctx.lineWidth=0.5;pctx.stroke();}}requestAnimationFrame(loop);}
   resz();loop();window.addEventListener('resize',resz);
 })();
 </script>
@@ -145,9 +247,9 @@ RAG_PIPELINE_HTML = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}body{background:#020208}
-#pipeline{background:rgba(0,3,14,0.92);border-bottom:1px solid rgba(0,200,255,0.1);padding:10px 16px 6px;overflow:hidden;}
+#pipeline{background:rgba(0,3,14,0.92);border-bottom:1px solid rgba(0,200,255,0.1);padding:10px 16px 6px;}
 .pl-label{font-family:'Share Tech Mono',monospace;font-size:0.48rem;letter-spacing:.2em;color:rgba(0,200,255,0.22);text-transform:uppercase;margin-bottom:8px;}
-.pl-nodes{display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:2px;}
+.pl-nodes{display:flex;align-items:center;overflow-x:auto;padding-bottom:2px;}
 .pnode{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:62px;flex-shrink:0;}
 .pnode .picon{width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,200,255,.18);display:flex;align-items:center;justify-content:center;font-size:10px;background:rgba(0,200,255,.04);transition:all .3s;position:relative;overflow:hidden;}
 .pnode .plabel{font-family:'Share Tech Mono',monospace;font-size:.38rem;color:rgba(0,200,255,.25);letter-spacing:.04em;text-align:center;text-transform:uppercase;line-height:1.3;}
@@ -163,7 +265,7 @@ RAG_PIPELINE_HTML = """
 </style>
 <div id="pipeline">
   <div class="pl-label">// rag pipeline · retrieve → augment → generate</div>
-  <div class="pl-nodes" id="pl-nodes">
+  <div class="pl-nodes">
     <div class="pnode" id="pn0"><div class="picon">📄<div class="scan"></div></div><div class="plabel">PDF<br>upload</div></div>
     <div class="parrow" id="pa0">──▶</div>
     <div class="pnode" id="pn1"><div class="picon">T<div class="scan"></div></div><div class="plabel">text<br>extract</div></div>
@@ -188,11 +290,7 @@ RAG_PIPELINE_HTML = """
   var total=9,step=0;
   function setNode(i,cls){var n=document.getElementById('pn'+i);if(n)n.className='pnode '+cls;}
   function setArrow(i,lit){var a=document.getElementById('pa'+i);if(a)a.className='parrow'+(lit?' lit':'');}
-  function runStep(){
-    if(step>0){setNode(step-1,'done');if(step>1)setArrow(step-2,'lit');}
-    if(step>=total){setTimeout(function(){for(var i=0;i<total;i++){setNode(i,'');setArrow(i,'');}step=0;setTimeout(runStep,600);},2000);return;}
-    setNode(step,'active');if(step>0)setArrow(step-1,'lit');step++;setTimeout(runStep,520);
-  }
+  function runStep(){if(step>0){setNode(step-1,'done');if(step>1)setArrow(step-2,'lit');}if(step>=total){setTimeout(function(){for(var i=0;i<total;i++){setNode(i,'');setArrow(i,'');}step=0;setTimeout(runStep,600);},2000);return;}setNode(step,'active');if(step>0)setArrow(step-1,'lit');step++;setTimeout(runStep,520);}
   setTimeout(runStep,400);
 })();
 </script>
@@ -210,8 +308,7 @@ EMPTY_STATE_HTML = """
 .es-sub{font-family:'Share Tech Mono',monospace;font-size:0.58rem;color:rgba(0,200,255,.12);letter-spacing:.08em;margin-bottom:28px;}
 #anim-canvas{display:block;margin:0 auto;}
 .es-flow{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;font-family:'Share Tech Mono',monospace;font-size:0.54rem;color:rgba(0,200,255,.15);letter-spacing:.1em;}
-.efa{animation:flowarrow 2s ease-in-out infinite;}
-.efa:nth-child(2){animation-delay:.3s}.efa:nth-child(4){animation-delay:.6s}.efa:nth-child(6){animation-delay:.9s}
+.efa{animation:flowarrow 2s ease-in-out infinite;}.efa:nth-child(2){animation-delay:.3s}.efa:nth-child(4){animation-delay:.6s}.efa:nth-child(6){animation-delay:.9s}
 @keyframes flowarrow{0%,100%{opacity:.12}50%{opacity:.7}}
 </style>
 <div id="es">
@@ -219,55 +316,53 @@ EMPTY_STATE_HTML = """
   <div class="es-title">UPLOAD A DOCUMENT TO BEGIN</div>
   <div class="es-sub">// open sidebar → drop pdf → ask anything</div>
   <canvas id="anim-canvas" width="420" height="120"></canvas>
-  <div class="es-flow">
-    <span>PDF</span><span class="efa">→</span>
-    <span>TEXT+IMAGES</span><span class="efa">→</span>
-    <span>EMBEDDINGS</span><span class="efa">→</span>
-    <span>AI</span><span class="efa">→</span>
-    <span>ANSWERS</span>
-  </div>
+  <div class="es-flow"><span>PDF</span><span class="efa">→</span><span>TEXT+IMAGES</span><span class="efa">→</span><span>EMBEDDINGS</span><span class="efa">→</span><span>AI</span><span class="efa">→</span><span>ANSWERS</span></div>
 </div>
 <script>
 (function(){
   var cv=document.getElementById('anim-canvas'),ctx=cv.getContext('2d'),W=420,H=120,t=0;
-  var dots=[];
-  for(var i=0;i<28;i++)dots.push({x:Math.random()*W,y:40+Math.random()*40,vx:Math.random()*1.5+0.4,a:Math.random()*.5+.1,r:Math.random()*2+.5,col:Math.random()>.5?'0,200,255':'0,255,136'});
-  function draw(){
-    ctx.clearRect(0,0,W,H);t++;
-    // boxes
-    function box(x,y,w,h,label,col){
-      ctx.strokeStyle='rgba('+col+',0.35)';ctx.lineWidth=0.8;ctx.strokeRect(x,y,w,h);
-      ctx.fillStyle='rgba('+col+',0.04)';ctx.fillRect(x,y,w,h);
-      ctx.fillStyle='rgba('+col+',0.6)';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(label,x+w/2,y+h/2+3);
-    }
-    box(8,40,52,38,'PDF','200,60,60');
-    ctx.strokeStyle='rgba(0,200,255,0.2)';ctx.lineWidth=0.8;
-    ctx.beginPath();ctx.moveTo(60,59);ctx.lineTo(95,45);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(60,59);ctx.lineTo(95,75);ctx.stroke();
-    box(95,22,60,40,'TEXT','0,200,255');
-    box(95,66,60,40,'IMAGES','100,80,255');
-    ctx.beginPath();ctx.moveTo(155,59);ctx.lineTo(190,59);ctx.stroke();
-    ctx.fillStyle='rgba(0,200,255,0.4)';ctx.font='8px monospace';ctx.textAlign='left';ctx.fillText('▶',185,62);
-    // vectors
-    ctx.strokeStyle='rgba(0,200,255,0.15)';ctx.lineWidth=0.5;ctx.strokeRect(195,30,70,58);
-    ctx.fillStyle='rgba(0,200,255,0.04)';ctx.fillRect(195,30,70,58);
-    ctx.fillStyle='rgba(0,200,255,0.4)';ctx.font='7px monospace';ctx.textAlign='center';ctx.fillText('VECTORS',230,42);
-    for(var r=0;r<3;r++)for(var c=0;c<6;c++){var px=202+c*10,py=50+r*12,g=Math.sin(t*.05+r*2+c*.5)*.5+.5;ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fillStyle='rgba(0,220,255,'+(0.3+g*.5)+')';ctx.fill();}
-    ctx.beginPath();ctx.moveTo(265,59);ctx.lineTo(300,59);ctx.stroke();
-    ctx.fillStyle='rgba(0,200,255,0.4)';ctx.textAlign='left';ctx.fillText('▶',295,62);
-    // AI box
-    ctx.strokeStyle='rgba(0,255,136,0.4)';ctx.lineWidth=1;ctx.strokeRect(305,35,50,48);
-    ctx.fillStyle='rgba(0,255,136,0.04)';ctx.fillRect(305,35,50,48);
-    ctx.fillStyle='rgba(0,255,136,0.7)';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('AI',330,63);
-    var pulse=Math.sin(t*.06)*.5+.5;
-    ctx.beginPath();ctx.arc(330,59,28+4*pulse,0,Math.PI*2);
-    ctx.strokeStyle='rgba(0,255,136,'+(0.06+pulse*.08)+')';ctx.lineWidth=0.5;ctx.stroke();
-    // dots
-    dots.forEach(function(d){ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle='rgba('+d.col+','+d.a+')';ctx.fill();d.x+=d.vx;if(d.x>W+5){d.x=-5;d.y=40+Math.random()*40;}});
-    requestAnimationFrame(draw);
-  }
+  var dots=[];for(var i=0;i<28;i++)dots.push({x:Math.random()*W,y:40+Math.random()*40,vx:Math.random()*1.5+0.4,a:Math.random()*.5+.1,r:Math.random()*2+.5,col:Math.random()>.5?'0,200,255':'0,255,136'});
+  function draw(){ctx.clearRect(0,0,W,H);t++;function box(x,y,w,h,label,col){ctx.strokeStyle='rgba('+col+',0.35)';ctx.lineWidth=0.8;ctx.strokeRect(x,y,w,h);ctx.fillStyle='rgba('+col+',0.04)';ctx.fillRect(x,y,w,h);ctx.fillStyle='rgba('+col+',0.6)';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText(label,x+w/2,y+h/2+3);}
+  box(8,40,52,38,'PDF','200,60,60');ctx.strokeStyle='rgba(0,200,255,0.2)';ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(60,59);ctx.lineTo(95,45);ctx.stroke();ctx.beginPath();ctx.moveTo(60,59);ctx.lineTo(95,75);ctx.stroke();box(95,22,60,40,'TEXT','0,200,255');box(95,66,60,40,'IMAGES','100,80,255');ctx.beginPath();ctx.moveTo(155,59);ctx.lineTo(190,59);ctx.stroke();ctx.fillStyle='rgba(0,200,255,0.4)';ctx.font='8px monospace';ctx.textAlign='left';ctx.fillText('▶',185,62);ctx.strokeStyle='rgba(0,200,255,0.15)';ctx.lineWidth=0.5;ctx.strokeRect(195,30,70,58);ctx.fillStyle='rgba(0,200,255,0.04)';ctx.fillRect(195,30,70,58);ctx.fillStyle='rgba(0,200,255,0.4)';ctx.font='7px monospace';ctx.textAlign='center';ctx.fillText('VECTORS',230,42);for(var r=0;r<3;r++)for(var c=0;c<6;c++){var px=202+c*10,py=50+r*12,g=Math.sin(t*.05+r*2+c*.5)*.5+.5;ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fillStyle='rgba(0,220,255,'+(0.3+g*.5)+')';ctx.fill();}ctx.beginPath();ctx.moveTo(265,59);ctx.lineTo(300,59);ctx.stroke();ctx.fillStyle='rgba(0,200,255,0.4)';ctx.textAlign='left';ctx.fillText('▶',295,62);ctx.strokeStyle='rgba(0,255,136,0.4)';ctx.lineWidth=1;ctx.strokeRect(305,35,50,48);ctx.fillStyle='rgba(0,255,136,0.04)';ctx.fillRect(305,35,50,48);ctx.fillStyle='rgba(0,255,136,0.7)';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('AI',330,63);var pulse=Math.sin(t*.06)*.5+.5;ctx.beginPath();ctx.arc(330,59,28+4*pulse,0,Math.PI*2);ctx.strokeStyle='rgba(0,255,136,'+(0.06+pulse*.08)+')';ctx.lineWidth=0.5;ctx.stroke();dots.forEach(function(d){ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fillStyle='rgba('+d.col+','+d.a+')';ctx.fill();d.x+=d.vx;if(d.x>W+5){d.x=-5;d.y=40+Math.random()*40;}});requestAnimationFrame(draw);}
   draw();
 })();
+</script>
+"""
+
+# ── SUGGESTION BAR — injects text into Streamlit chat input ──────────────────
+CHAT_BANNER_HTML = """
+<style>
+body{margin:0;background:rgba(0,2,14,0.85);}
+.sug-bar{display:flex;gap:7px;align-items:center;padding:7px 20px;border-bottom:1px solid rgba(0,200,255,0.07);overflow-x:auto;flex-wrap:nowrap;}
+.sug-prefix{font-family:'Share Tech Mono',monospace;font-size:0.5rem;color:rgba(0,200,255,0.3);letter-spacing:.14em;white-space:nowrap;}
+.sug-tag{font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.5);border:1px solid rgba(0,200,255,0.2);padding:4px 12px;border-radius:20px;white-space:nowrap;cursor:pointer;transition:all 0.2s;background:rgba(0,200,255,0.03);}
+.sug-tag:hover{color:#00dcff;border-color:rgba(0,200,255,0.7);background:rgba(0,200,255,0.1);box-shadow:0 0 10px rgba(0,200,255,0.2);}
+</style>
+<div class="sug-bar">
+  <div class="sug-prefix">TRY →</div>
+  <div class="sug-tag" onclick="inject(this)">summarize this</div>
+  <div class="sug-tag" onclick="inject(this)">show 1st image</div>
+  <div class="sug-tag" onclick="inject(this)">what is chapter 3 about?</div>
+  <div class="sug-tag" onclick="inject(this)">show all figures</div>
+  <div class="sug-tag" onclick="inject(this)">key findings?</div>
+  <div class="sug-tag" onclick="inject(this)">explain the methodology</div>
+</div>
+<script>
+function inject(el){
+  var text = el.textContent.trim();
+  var doc  = window.parent.document;
+  // Find the Streamlit chat textarea
+  var ta = doc.querySelector('[data-testid="stChatInput"] textarea');
+  if(!ta) ta = doc.querySelector('textarea');
+  if(!ta) return;
+  // Use React's synthetic event system to properly set value
+  var nativeSetter = Object.getOwnPropertyDescriptor(window.parent.HTMLTextAreaElement.prototype, 'value').set;
+  nativeSetter.call(ta, text);
+  ta.dispatchEvent(new Event('input', {bubbles: true}));
+  ta.dispatchEvent(new Event('change', {bubbles: true}));
+  ta.focus();
+  ta.setSelectionRange(text.length, text.length);
+}
 </script>
 """
 
@@ -277,17 +372,6 @@ THINKING_HTML = """
   <div class="think-line">> ranking by cosine similarity…</div>
   <div class="think-line">> generating answer…</div>
   <div class="think-bar"><div class="think-bar-fill"></div></div>
-</div>
-"""
-
-CHAT_BANNER_HTML = """
-<div class="sug-bar">
-  <div class="sug-prefix">TRY →</div>
-  <div class="sug-tag">summarize this</div>
-  <div class="sug-tag">show 1st image</div>
-  <div class="sug-tag">chapter 3?</div>
-  <div class="sug-tag">show all figures</div>
-  <div class="sug-tag">key findings?</div>
 </div>
 """
 
@@ -311,10 +395,9 @@ def find_matching_images(question, image_store):
         idx = int(n)-1
         if 0 <= idx < len(image_store): return [image_store[idx]]
     if "last" in q: return [image_store[-1]]
-    if "all" in q: return image_store[:5]
+    if "all"  in q: return image_store[:5]
     return [image_store[0]]
 
-# ── MODELS ────────────────────────────────────────────────────────────────────
 @st.cache_resource
 def load_models():
     m = SentenceTransformer('all-MiniLM-L6-v2')
@@ -340,84 +423,147 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<span class="s-label">// Drop your PDF</span>', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
-
-    if uploaded_file:
-        st.markdown(f"""
-        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.5);
-          padding:5px 8px;border-left:2px solid rgba(0,200,255,0.3);margin-bottom:8px;word-break:break-all;">
-          › {uploaded_file.name}</div>""", unsafe_allow_html=True)
-
-        if st.button("⚡  PROCESS & INDEX"):
-            t_start = time.time()
-            proc_ph = st.empty()
-            STEPS = ["extracting text","analyzing images","chunking","embedding","building index","complete ✓"]
-
-            def show_proc(step, pct):
-                rows = ""
-                for i, lbl in enumerate(STEPS):
-                    col = "rgba(0,255,136,0.75)" if i < step else ("rgba(0,200,255,0.9)" if i == step else "rgba(0,200,255,0.2)")
-                    ind = "✓" if i < step else ("●" if i == step else "○")
-                    rows += f'<div style="font-family:Share Tech Mono,monospace;font-size:0.6rem;color:{col};padding:2px 0;letter-spacing:.06em;"><span>{ind}</span> > {lbl}</div>'
-                proc_ph.markdown(f"""
-                <div style="background:rgba(0,10,28,0.95);border:1px solid rgba(0,200,255,0.2);border-radius:10px;padding:14px 16px;margin:6px 0;">
-                  <div style="font-family:'Orbitron',monospace;font-size:0.68rem;color:#00dcff;letter-spacing:.1em;margin-bottom:8px;">⬡ PROCESSING</div>
-                  <div style="background:rgba(0,200,255,0.08);border-radius:2px;height:2px;margin-bottom:10px;overflow:hidden;">
-                    <div style="height:2px;background:linear-gradient(90deg,#00dcff,#00ff88);width:{pct}%;transition:width 0.4s;"></div>
-                  </div>{rows}
-                </div>""", unsafe_allow_html=True)
-
-            show_proc(0, 5)
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(uploaded_file.read()); tmp_path = tmp.name
-
-            doc = fitz.open(tmp_path)
-            full_text, total, image_store, img_idx = "", len(doc), [], 0
-
-            show_proc(1, 15)
-            for pnum, page in enumerate(doc):
-                full_text += page.get_text()
-                for img in page.get_images():
-                    try:
-                        xref = img[0]; bi = doc.extract_image(xref)
-                        b64 = base64.b64encode(bi["image"]).decode()
-                        mt = "image/png" if bi["ext"] == "png" else "image/jpeg"
-                        resp = anthropic_client.messages.create(
-                            model="claude-haiku-4-5-20251001", max_tokens=300,
-                            messages=[{"role":"user","content":[
-                                {"type":"image","source":{"type":"base64","media_type":mt,"data":b64}},
-                                {"type":"text","text":"Describe this image concisely. If diagram/chart, explain what it shows."}
-                            ]}]
-                        )
-                        desc = resp.content[0].text
-                        image_store.append({"b64":b64,"media_type":mt,"page":pnum+1,"index":img_idx,"description":desc})
-                        img_idx += 1
-                        full_text += f"\n[Image {img_idx} on page {pnum+1}]: {desc}\n"
-                    except: continue
-                show_proc(1, 15+int((pnum+1)/total*35))
-
-            doc.close(); os.unlink(tmp_path)
-            show_proc(2, 55)
-            chunks = extract_chunks(full_text)
-            show_proc(3, 70)
-            embs = np.array(model.encode(chunks)).astype('float32')
-            show_proc(4, 88, )
-            index = faiss.IndexFlatL2(embs.shape[1]); index.add(embs)
-            show_proc(5, 100)
-            time.sleep(0.3); proc_ph.empty()
-            t_done = time.time() - t_start
-
-            st.session_state.update({
-                "index":index,"chunks":chunks,"messages":[],"chat_display":[],
-                "chunk_count":len(chunks),"image_store":image_store,"image_count":len(image_store),
-                "page_count":total,"process_time":t_done,
-            })
-            st.success(f"✓ {len(chunks)} chunks · {len(image_store)} images · {fmt_time(t_done)}")
+    # ── Built by — near top ──
+    st.markdown("""
+    <span class="s-label">// Built by</span>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.68rem;color:rgba(0,200,255,0.65);margin-bottom:7px;">Sai Jyothi Gayathri Adabala</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <div onclick="copyEmail()" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;border:1px solid rgba(0,200,255,0.18);border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:.5rem;color:rgba(0,200,255,0.5);cursor:pointer;background:rgba(0,200,255,0.02);transition:all .2s;">✉ email</div>
+      <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px;border:1px solid rgba(0,200,255,0.18);border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:.5rem;color:rgba(0,200,255,0.5);text-decoration:none;background:rgba(0,200,255,0.02);">in linkedin</a>
+    </div>
+    <div id="toast" style="display:none;background:rgba(0,255,136,0.12);border:1px solid rgba(0,255,136,0.35);color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:0.6rem;padding:5px 10px;border-radius:6px;margin-bottom:6px;text-align:center;">✓ email copied!</div>
+    <script>
+    function copyEmail(){
+      navigator.clipboard.writeText('asjyothig@gmail.com').then(function(){
+        var t=document.getElementById('toast');t.style.display='block';
+        setTimeout(function(){t.style.display='none';},2000);
+      });
+    }
+    </script>
+    """, unsafe_allow_html=True)
 
     st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
 
-    # metrics
+    # ── Upload section with toggle ──
+    st.markdown('<span class="s-label">// Document</span>', unsafe_allow_html=True)
+
+    if "show_uploader" not in st.session_state:
+        st.session_state.show_uploader = True
+
+    # Always-visible toggle button
+    btn_label = "📂  UPLOAD NEW PDF" if not st.session_state.show_uploader else "📂  CHANGE PDF"
+    if st.button(btn_label, key="toggle_upload"):
+        st.session_state.show_uploader = not st.session_state.show_uploader
+        st.rerun()
+
+    if st.session_state.show_uploader:
+        uploaded_file = st.file_uploader("", type="pdf", label_visibility="collapsed")
+        if uploaded_file:
+            st.markdown(f"""
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,200,255,0.5);
+              padding:5px 8px;border-left:2px solid rgba(0,200,255,0.3);margin-bottom:8px;word-break:break-all;">
+              › {uploaded_file.name}</div>""", unsafe_allow_html=True)
+
+            if st.button("⚡  PROCESS & INDEX"):
+                t_start = time.time()
+                proc_ph = st.empty()
+                STEPS = ["extracting text + OCR","analyzing images","chunking document","generating embeddings","building FAISS index","ready for queries"]
+
+                def show_proc(step, pct, current_label="", chunks_so_far=0, images_so_far=0):
+                    rows = ""
+                    for i, lbl in enumerate(STEPS):
+                        col  = "rgba(0,255,136,0.8)" if i < step else ("rgba(0,200,255,0.95)" if i == step else "rgba(0,200,255,0.18)")
+                        ind  = "✓" if i < step else ("●" if i == step else "○")
+                        rows += f'<div style="font-family:Share Tech Mono,monospace;font-size:0.62rem;color:{col};padding:3px 0;letter-spacing:.05em;display:flex;align-items:center;gap:8px;"><span style="color:{col};font-size:0.7rem;">{ind}</span> > {lbl}</div>'
+
+                    stats = ""
+                    if chunks_so_far > 0:
+                        stats = f"""
+                        <div style="display:flex;gap:24px;margin-top:14px;padding-top:10px;border-top:1px solid rgba(0,200,255,0.1);">
+                          <div style="text-align:center;">
+                            <div style="font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:#00dcff;">{chunks_so_far}</div>
+                            <div style="font-family:'Share Tech Mono',monospace;font-size:0.48rem;color:rgba(0,200,255,0.35);letter-spacing:.1em;">chunks</div>
+                          </div>
+                          <div style="text-align:center;">
+                            <div style="font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:#00ff88;">{images_so_far}</div>
+                            <div style="font-family:'Share Tech Mono',monospace;font-size:0.48rem;color:rgba(0,200,255,0.35);letter-spacing:.1em;">images</div>
+                          </div>
+                        </div>"""
+
+                    proc_ph.markdown(f"""
+                    <div style="background:rgba(0,6,22,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:14px;padding:20px 20px 16px;margin:6px 0;backdrop-filter:blur(10px);">
+                      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                        <div style="font-family:'Orbitron',monospace;font-size:0.62rem;color:rgba(0,200,255,0.4);letter-spacing:.1em;font-weight:700;width:28px;height:28px;border:1px solid rgba(0,200,255,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center;">⬡</div>
+                        <div>
+                          <div style="font-family:'Orbitron',monospace;font-size:0.72rem;color:#00dcff;letter-spacing:.08em;font-weight:700;">{STEPS[min(step, len(STEPS)-1)].upper()}</div>
+                          <div style="font-family:'Share Tech Mono',monospace;font-size:0.48rem;color:rgba(0,200,255,0.3);letter-spacing:.06em;margin-top:1px;">{uploaded_file.name}</div>
+                        </div>
+                      </div>
+                      <div style="background:rgba(0,200,255,0.06);border-radius:2px;height:2px;margin-bottom:14px;overflow:hidden;">
+                        <div style="height:2px;background:linear-gradient(90deg,#00dcff,#00ff88);width:{pct}%;transition:width 0.5s ease;"></div>
+                      </div>
+                      <div>{rows}</div>
+                      {stats}
+                    </div>""", unsafe_allow_html=True)
+
+                show_proc(0, 5)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                    tmp.write(uploaded_file.read()); tmp_path = tmp.name
+
+                doc = fitz.open(tmp_path)
+                full_text, total, image_store, img_idx = "", len(doc), [], 0
+
+                show_proc(1, 15)
+                for pnum, page in enumerate(doc):
+                    full_text += page.get_text()
+                    for img in page.get_images():
+                        try:
+                            xref = img[0]; bi = doc.extract_image(xref)
+                            b64 = base64.b64encode(bi["image"]).decode()
+                            mt = "image/png" if bi["ext"] == "png" else "image/jpeg"
+                            resp = anthropic_client.messages.create(
+                                model="claude-haiku-4-5-20251001", max_tokens=300,
+                                messages=[{"role":"user","content":[
+                                    {"type":"image","source":{"type":"base64","media_type":mt,"data":b64}},
+                                    {"type":"text","text":"Describe this image concisely. If diagram/chart, explain what it shows."}
+                                ]}]
+                            )
+                            desc = resp.content[0].text
+                            image_store.append({"b64":b64,"media_type":mt,"page":pnum+1,"index":img_idx,"description":desc})
+                            img_idx += 1
+                            full_text += f"\n[Image {img_idx} on page {pnum+1}]: {desc}\n"
+                        except: continue
+                    show_proc(1, 15+int((pnum+1)/total*30), images_so_far=img_idx)
+
+                doc.close(); os.unlink(tmp_path)
+                show_proc(2, 50, images_so_far=img_idx)
+                chunks = extract_chunks(full_text)
+                show_proc(3, 68, chunks_so_far=len(chunks), images_so_far=img_idx)
+                embs = np.array(model.encode(chunks)).astype('float32')
+                show_proc(4, 88, chunks_so_far=len(chunks), images_so_far=img_idx)
+                index = faiss.IndexFlatL2(embs.shape[1]); index.add(embs)
+                show_proc(5, 100, chunks_so_far=len(chunks), images_so_far=img_idx)
+                time.sleep(0.6); proc_ph.empty()
+                t_done = time.time() - t_start
+
+                st.session_state.update({
+                    "index":index,"chunks":chunks,"messages":[],"chat_display":[],
+                    "chunk_count":len(chunks),"image_store":image_store,"image_count":len(image_store),
+                    "page_count":total,"process_time":t_done,"show_uploader":False,
+                })
+                st.success(f"✓ {len(chunks)} chunks · {len(image_store)} images · {fmt_time(t_done)}")
+                st.rerun()
+    else:
+        uploaded_file = None
+        # Show current doc name if indexed
+        if "chunk_count" in st.session_state:
+            st.markdown(f"""
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:rgba(0,255,136,0.6);
+              padding:5px 8px;border-left:2px solid rgba(0,255,136,0.3);margin-bottom:4px;">
+              ✓ Document indexed & ready</div>""", unsafe_allow_html=True)
+
+    st.markdown('<hr class="s-divider">', unsafe_allow_html=True)
+
     cc = st.session_state.get("chunk_count",0)
     ic = st.session_state.get("image_count",0)
     pc = st.session_state.get("page_count",0)
@@ -442,17 +588,12 @@ with st.sidebar:
       › reference page numbers<br>
       › request summaries
     </div>
-    <hr class="s-divider">
-    <span class="s-label">// Built by</span>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:rgba(0,200,255,0.6);margin-bottom:8px;">Sai Jyothi Gayathri Adabala</div>
-    <div style="display:flex;gap:6px;">
-      <a href="mailto:asjyothig@gmail.com" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:5px;border:1px solid rgba(0,200,255,0.18);border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:.5rem;color:rgba(0,200,255,0.5);text-decoration:none;background:rgba(0,200,255,0.02);transition:all .2s;" onmouseover="this.style.borderColor='rgba(0,200,255,0.55)';this.style.color='#00dcff'" onmouseout="this.style.borderColor='rgba(0,200,255,0.18)';this.style.color='rgba(0,200,255,0.5)'">✉ email</a>
-      <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:5px;border:1px solid rgba(0,200,255,0.18);border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:.5rem;color:rgba(0,200,255,0.5);text-decoration:none;background:rgba(0,200,255,0.02);transition:all .2s;" onmouseover="this.style.borderColor='rgba(0,200,255,0.55)';this.style.color='#00dcff'" onmouseout="this.style.borderColor='rgba(0,200,255,0.18)';this.style.color='rgba(0,200,255,0.5)'">in linkedin</a>
-    </div>
-    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">CLAUDE · FAISS · SENTENCE-TRANSFORMERS</div>
+    <div style="margin-top:14px;font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">CLAUDE · FAISS · SENTENCE-TRANSFORMERS</div>
     """, unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
+# Always inject the sidebar open button (visible when sidebar is closed)
+st.components.v1.html(SIDEBAR_OPEN_BTN, height=0, scrolling=False)
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
 
 if "index" not in st.session_state:
@@ -462,7 +603,7 @@ else:
     if "messages" not in st.session_state: st.session_state.messages = []
 
     st.components.v1.html(RAG_PIPELINE_HTML, height=82, scrolling=False)
-    st.markdown(CHAT_BANNER_HTML, unsafe_allow_html=True)
+    st.components.v1.html(CHAT_BANNER_HTML, height=44, scrolling=False)
 
     for entry in st.session_state.chat_display:
         with st.chat_message(entry["role"]):
