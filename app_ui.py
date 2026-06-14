@@ -10,6 +10,7 @@ import faiss
 import time
 import re
 import pickle
+import math
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -56,7 +57,11 @@ st.markdown("""
 html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important;color:#c8e0f0!important;font-family:'Inter',sans-serif!important;}
 [data-testid="stSidebar"]{background:rgba(0,4,18,0.98)!important;border-right:1px solid rgba(0,200,255,0.12)!important;min-width:260px!important;}
 [data-testid="stSidebar"]>div{padding-top:0!important;}
-[data-testid="stSidebarCollapseButton"],[data-testid="collapsedControl"]{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;}
+
+[data-testid="stSidebarCollapseButton"],
+[data-testid="collapsedControl"]{
+  display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;
+}
 
 [data-testid="stFileUploader"]{background:rgba(0,10,30,0.6)!important;border:2px dashed rgba(0,200,255,0.45)!important;border-radius:12px!important;transition:all 0.3s!important;box-shadow:0 0 18px rgba(0,200,255,0.12),inset 0 0 18px rgba(0,200,255,0.04)!important;}
 [data-testid="stFileUploader"]:hover{border-color:rgba(0,200,255,0.85)!important;box-shadow:0 0 32px rgba(0,200,255,0.28),inset 0 0 24px rgba(0,200,255,0.08)!important;}
@@ -85,7 +90,7 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 [data-testid="stChatInput"]>div{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
 [data-testid="stChatInput"] [data-baseweb="base-input"],[data-testid="stChatInput"] [data-baseweb="textarea"],[data-testid="stChatInput"] [class*="InputContainer"],[data-testid="stChatInput"] [class*="BaseInput"]{border:none!important;outline:none!important;box-shadow:none!important;background:transparent!important;}
 [data-testid="stChatInput"] textarea{background:rgba(0,200,255,0.04)!important;border:1.5px solid rgba(0,200,255,0.3)!important;border-radius:26px!important;color:#a8dcf8!important;font-family:'Inter',sans-serif!important;font-size:0.9rem!important;padding:11px 20px!important;outline:none!important;box-shadow:none!important;caret-color:#00dcff!important;}
-[data-testid="stChatInput"] textarea:focus,[data-testid="stChatInput"] textarea:focus-visible{border:1.5px solid rgba(0,200,255,0.8)!important;outline:none!important;box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;background:rgba(0,200,255,0.06)!important;}
+[data-testid="stChatInput"] textarea:focus,[data-testid="stChatInput"] textarea:focus-visible,[data-testid="stChatInput"] textarea:focus-within{border:1.5px solid rgba(0,200,255,0.8)!important;outline:none!important;box-shadow:0 0 0 2px rgba(0,200,255,0.15),0 0 20px rgba(0,200,255,0.2)!important;background:rgba(0,200,255,0.06)!important;}
 [data-testid="stChatInput"] textarea::placeholder{color:rgba(0,200,255,0.22)!important;}
 [data-testid="stChatInput"] button{background:rgba(0,200,255,0.16)!important;border:1.5px solid rgba(0,200,255,0.45)!important;color:#00dcff!important;border-radius:50%!important;}
 [data-testid="stChatInput"] button:hover{background:rgba(0,200,255,0.3)!important;box-shadow:0 0 16px rgba(0,200,255,0.4)!important;}
@@ -117,18 +122,6 @@ html,body,.stApp,[data-testid="stAppViewContainer"]{background:#020208!important
 .rc-line{animation:rcfade 0.4s ease forwards;opacity:0;font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:rgba(0,200,255,0.4);line-height:1.9;}
 .rc-line:nth-child(2){animation-delay:.15s}.rc-line:nth-child(3){animation-delay:.3s}
 @keyframes rcfade{to{opacity:1}}
-
-/* accuracy metric special color */
-.metric-card.accuracy .metric-val{color:#00ff88;}
-.metric-card.accuracy{border-color:rgba(0,255,136,0.15);}
-
-/* feedback buttons */
-.fb-row{display:flex;gap:6px;margin-top:8px;align-items:center;}
-.fb-btn{background:transparent;border:1px solid rgba(0,200,255,0.15);border-radius:20px;padding:3px 10px;font-size:0.65rem;cursor:pointer;transition:all .2s;font-family:'Share Tech Mono',monospace;color:rgba(0,200,255,0.35);}
-.fb-btn:hover{border-color:rgba(0,200,255,0.6);color:#00dcff;}
-.fb-btn.liked{border-color:rgba(0,255,136,0.6);color:#00ff88;background:rgba(0,255,136,0.06);}
-.fb-btn.disliked{border-color:rgba(255,80,80,0.5);color:rgba(255,100,100,0.8);background:rgba(255,50,50,0.05);}
-.fb-score{font-family:'Share Tech Mono',monospace;font-size:0.5rem;color:rgba(0,200,255,0.25);margin-left:4px;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -312,10 +305,49 @@ THINKING_HTML = """
 </div>
 """
 
-def retrieval_html(chunk_indices, confidence_pct):
+# ── SIDEBAR TOGGLE BUTTON (glowing, fixed left edge) ─────────────────────────
+SIDEBAR_TOGGLE_JS = """
+<script>
+(function(){
+  var STYLE_ID='sb-float-style',BTN_ID='sb-float-btn';
+  function getDoc(){return window.parent?window.parent.document:document;}
+  function ensureStyle(doc){
+    if(doc.getElementById(STYLE_ID))return;
+    var s=doc.createElement('style');s.id=STYLE_ID;
+    s.textContent=[
+      '@keyframes sbglow{0%,100%{box-shadow:0 0 14px rgba(0,200,255,.4),3px 0 10px rgba(0,200,255,.15)}50%{box-shadow:0 0 30px rgba(0,200,255,.85),3px 0 20px rgba(0,200,255,.4)}}',
+      '#'+BTN_ID+'{position:fixed!important;left:0!important;top:50%!important;transform:translateY(-50%)!important;z-index:2147483647!important;width:26px!important;height:60px!important;background:rgba(0,8,24,0.95)!important;border:1.5px solid rgba(0,200,255,0.65)!important;border-left:none!important;border-radius:0 10px 10px 0!important;color:#00dcff!important;font-size:14px!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;animation:sbglow 2.2s ease-in-out infinite!important;outline:none!important;padding:0!important;}',
+      '#'+BTN_ID+':hover{background:rgba(0,200,255,0.28)!important;}'
+    ].join('');
+    doc.head.appendChild(s);
+  }
+  function ensureButton(doc){
+    if(doc.getElementById(BTN_ID))return;
+    var btn=doc.createElement('button');btn.id=BTN_ID;btn.title='Toggle Sidebar';btn.innerHTML='&#8942;';
+    btn.addEventListener('click',function(){
+      var targets=['[data-testid="stSidebarCollapseButton"] button','[data-testid="stSidebarCollapseButton"]','[data-testid="collapsedControl"] button','[data-testid="collapsedControl"]'];
+      for(var i=0;i<targets.length;i++){var el=doc.querySelector(targets[i]);if(el){el.click();return;}}
+      var sb=doc.querySelector('[data-testid="stSidebar"]');
+      if(sb){sb.style.display=(sb.style.display==='none')?'':'none';}
+    });
+    doc.body.appendChild(btn);
+  }
+  function init(){var doc=getDoc();ensureStyle(doc);ensureButton(doc);}
+  init();setTimeout(init,600);setTimeout(init,1800);
+  var doc=getDoc();
+  var observer=new MutationObserver(function(){if(!doc.getElementById(BTN_ID))ensureButton(doc);});
+  setTimeout(function(){observer.observe(doc.body,{childList:true,subtree:false});},800);
+})();
+</script>
+"""
+
+def retrieval_html(chunk_indices, confidence_pct=None):
     lines = "".join(f'<div class="rc-line">› Chunk {i} matched ✓</div>' for i in chunk_indices)
-    color = "#00ff88" if confidence_pct >= 80 else "#00dcff" if confidence_pct >= 60 else "rgba(255,180,0,0.8)"
-    return f'<div style="padding:6px 20px;">{lines}<div style="font-family:Share Tech Mono,monospace;font-size:0.5rem;color:{color};margin-top:4px;letter-spacing:.08em;">› retrieval confidence: {confidence_pct}%</div></div>'
+    conf_html = ""
+    if confidence_pct is not None:
+        color = "#00ff88" if confidence_pct >= 80 else "#00dcff" if confidence_pct >= 60 else "rgba(255,180,0,0.8)"
+        conf_html = f'<div style="font-family:Share Tech Mono,monospace;font-size:0.5rem;color:{color};margin-top:4px;letter-spacing:.08em;">› retrieval confidence: {confidence_pct}%</div>'
+    return f'<div style="padding:6px 20px;">{lines}{conf_html}</div>'
 
 def fmt_time(s): return f"{s:.1f}s" if s < 60 else f"{int(s//60)}m {s%60:.0f}s"
 def local_time(): return datetime.now().strftime("%I:%M %p").lstrip("0")
@@ -338,14 +370,18 @@ def find_matching_images(question, image_store):
 
 # ── ACCURACY HELPERS ──────────────────────────────────────────────────────────
 def ce_scores_to_pct(scores):
-    """Convert cross-encoder raw scores to 0-100 percentage."""
-    import math
+    """Convert cross-encoder raw scores to 0-100 percentage via sigmoid."""
     def sigmoid(x): return 1 / (1 + math.exp(-x))
     avg = sum(sigmoid(s) for s in scores[:3]) / min(3, len(scores))
     return int(round(avg * 100))
 
 def compute_session_accuracy():
-    """Weighted accuracy: base retrieval score + feedback boost."""
+    """
+    Blended accuracy:
+    - Before any feedback: shows retrieval confidence only
+    - After feedback: 60% retrieval confidence + 40% user feedback ratio
+    This is a display metric only — does not change retrieval or model behavior.
+    """
     base = st.session_state.get("last_retrieval_pct", 0)
     likes = st.session_state.get("total_likes", 0)
     dislikes = st.session_state.get("total_dislikes", 0)
@@ -353,7 +389,6 @@ def compute_session_accuracy():
     if total_fb == 0:
         return base
     fb_score = int((likes / total_fb) * 100)
-    # weighted blend: 60% retrieval, 40% user feedback
     return int(base * 0.6 + fb_score * 0.4)
 
 @st.cache_resource
@@ -379,7 +414,7 @@ if "index" not in st.session_state and not st.session_state.get("cleared", False
             "messages": [], "chat_display": [],
             "restored_from_disk": True,
             "total_likes": 0, "total_dislikes": 0,
-            "last_retrieval_pct": 0,
+            "last_retrieval_pct": 0, "feedback": {},
         })
 
 def extract_chunks(text, chunk_size=500, overlap=100):
@@ -413,7 +448,8 @@ with st.sidebar:
             clear_disk()
             for k in ["index","chunks","image_store","image_count","chunk_count",
                       "page_count","process_time","messages","chat_display",
-                      "restored_from_disk","show_uploader","total_likes","total_dislikes","last_retrieval_pct"]:
+                      "restored_from_disk","show_uploader","total_likes","total_dislikes",
+                      "last_retrieval_pct","feedback","intro_context"]:
                 st.session_state.pop(k, None)
             st.session_state["cleared"] = True
             st.rerun()
@@ -436,7 +472,7 @@ with st.sidebar:
             if st.button("⚡  PROCESS & INDEX"):
                 t_start = time.time()
                 proc_ph = st.empty()
-                STEPS = ["extracting text","indexing images","chunking","embedding","building index","ready ✓"]
+                STEPS = ["extracting text","indexing images (metadata only)","chunking","embedding","building index","ready ✓"]
 
                 def show_proc(step, pct, chunks_n=0, images_n=0):
                     rows = ""
@@ -502,7 +538,8 @@ with st.sidebar:
                     "image_count": len(image_store), "page_count": total,
                     "process_time": t_done, "show_uploader": False,
                     "intro_context": intro_words, "restored_from_disk": False,
-                    "total_likes": 0, "total_dislikes": 0, "last_retrieval_pct": 0,
+                    "total_likes": 0, "total_dislikes": 0,
+                    "last_retrieval_pct": 0, "feedback": {},
                 })
                 st.rerun()
     else:
@@ -521,7 +558,7 @@ with st.sidebar:
     pt = st.session_state.get("process_time", None)
     show_stats = "chunk_count" in st.session_state
 
-    # ── ACCURACY SCORE ──
+    # ── ACCURACY ──
     accuracy = compute_session_accuracy() if show_stats else 0
     accuracy_disp = f"{accuracy}%" if show_stats else "—"
     accuracy_color = "#00ff88" if accuracy >= 80 else "#00dcff" if accuracy >= 60 else "rgba(255,180,0,0.9)"
@@ -532,11 +569,14 @@ with st.sidebar:
       <div class="metric-card"><div class="metric-val">{pc if show_stats else '—'}</div><div class="metric-lbl">Pages</div></div>
       <div class="metric-card"><div class="metric-val">{cc if show_stats else '—'}</div><div class="metric-lbl">Chunks</div></div>
       <div class="metric-card"><div class="metric-val">{ic if show_stats else '—'}</div><div class="metric-lbl">Images</div></div>
-      <div class="metric-card accuracy"><div class="metric-val" style="color:{accuracy_color};">{accuracy_disp}</div><div class="metric-lbl">Accuracy</div></div>
+      <div class="metric-card" style="border-color:rgba(0,255,136,0.15);">
+        <div class="metric-val" style="color:{accuracy_color};">{accuracy_disp}</div>
+        <div class="metric-lbl">Accuracy</div>
+      </div>
       <div class="metric-card" style="grid-column:span 2"><div class="metric-val">{fmt_time(pt) if (show_stats and pt) else '—'}</div><div class="metric-lbl">Process Time</div></div>
     </div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:0.48rem;color:rgba(0,200,255,0.2);margin-top:6px;letter-spacing:.06em;">
-      accuracy = retrieval confidence + your feedback
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.45rem;color:rgba(0,200,255,0.18);margin-top:5px;letter-spacing:.05em;">
+      retrieval confidence + 👍👎 feedback · display only
     </div>
     """, unsafe_allow_html=True)
 
@@ -557,7 +597,8 @@ with st.sidebar:
 
     st.markdown('<span class="s-label">// Built by</span>', unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;color:rgba(0,200,255,0.6);margin-bottom:10px;">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.66rem;
+      color:rgba(0,200,255,0.6);margin-bottom:10px;">
       Sai Jyothi Gayathri Adabala
     </div>""", unsafe_allow_html=True)
 
@@ -570,24 +611,35 @@ with st.sidebar:
     cs = st.session_state.get("contact_show")
     if cs == "email":
         st.markdown("""
-        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:8px;padding:10px 14px;">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:rgba(0,200,255,0.75);">✉ asjyothig@gmail.com</div>
+        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
+          border-radius:8px;padding:10px 14px;">
+          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:rgba(0,200,255,0.75);letter-spacing:.04em;">
+            ✉ &nbsp;asjyothig@gmail.com</div>
         </div>""", unsafe_allow_html=True)
     elif cs == "linkedin":
         st.markdown("""
-        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);border-radius:8px;padding:10px 14px;">
+        <div style="margin-top:6px;background:rgba(0,10,28,0.97);border:1px solid rgba(0,200,255,0.22);
+          border-radius:8px;padding:10px 14px;">
+          <div style="font-family:'Orbitron',monospace;font-size:0.58rem;color:#00dcff;letter-spacing:.08em;margin-bottom:6px;">✦ Sai Jyothi Gayathri Adabala</div>
           <a href="https://www.linkedin.com/in/sai-jyothi-gayathri-adabala-a41a9818b/" target="_blank"
-             style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#00dcff;text-decoration:none;display:block;border:1px solid rgba(0,200,255,0.35);border-radius:6px;padding:7px 10px;text-align:center;background:rgba(0,200,255,0.06);">
+             style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#00dcff;text-decoration:none;
+               display:block;border:1px solid rgba(0,200,255,0.35);border-radius:6px;padding:7px 10px;
+               text-align:center;background:rgba(0,200,255,0.06);">
             → Open LinkedIn Profile ↗
           </a>
         </div>""", unsafe_allow_html=True)
 
     st.markdown("""
-    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">
+    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:7px;
+      color:rgba(0,200,255,0.1);letter-spacing:.08em;text-align:center;
+      border-top:1px solid rgba(0,200,255,0.05);padding-top:8px;">
       CLAUDE · FAISS · SENTENCE-TRANSFORMERS
     </div>""", unsafe_allow_html=True)
 
 # ── MAIN ──────────────────────────────────────────────────────────────────────
+# Sidebar toggle button — glowing pill on left edge
+st.components.v1.html(SIDEBAR_TOGGLE_JS, height=0, scrolling=False)
 st.components.v1.html(HERO_HTML, height=202, scrolling=False)
 
 if "index" not in st.session_state:
@@ -598,6 +650,7 @@ else:
     if "feedback" not in st.session_state: st.session_state.feedback = {}
     if "total_likes" not in st.session_state: st.session_state.total_likes = 0
     if "total_dislikes" not in st.session_state: st.session_state.total_dislikes = 0
+    if "last_retrieval_pct" not in st.session_state: st.session_state.last_retrieval_pct = 0
 
     st.components.v1.html(RAG_PIPELINE_HTML, height=82, scrolling=False)
     st.components.v1.html(CHAT_BANNER_HTML, height=44, scrolling=False)
@@ -612,7 +665,7 @@ else:
                 st.markdown(f'<div class="img-frame img-slide"><div class="img-frame-label"><span>// IMAGE {img_data["index"]+1}</span><span>PAGE {img_data["page"]}</span></div></div>', unsafe_allow_html=True)
                 st.image(base64.b64decode(img_data["b64"]))
 
-            # ── LIKE/DISLIKE on assistant messages ──
+            # ── LIKE / DISLIKE on assistant messages ──
             if entry["role"] == "assistant":
                 fb_key = f"fb_{idx_e}"
                 current_fb = st.session_state.feedback.get(fb_key, None)
@@ -620,8 +673,7 @@ else:
 
                 col_l, col_d, col_conf = st.columns([1, 1, 6])
                 with col_l:
-                    like_style = "liked" if current_fb == "like" else ""
-                    if st.button("👍", key=f"like_{idx_e}", help="Helpful answer"):
+                    if st.button("👍", key=f"like_{idx_e}", help="Helpful"):
                         if current_fb != "like":
                             if current_fb == "dislike":
                                 st.session_state.total_dislikes = max(0, st.session_state.total_dislikes - 1)
@@ -639,8 +691,8 @@ else:
                 with col_conf:
                     if conf > 0:
                         conf_color = "#00ff88" if conf >= 80 else "#00dcff" if conf >= 60 else "rgba(255,180,0,0.8)"
-                        fb_label = " · you liked this ✓" if current_fb == "like" else " · marked not helpful" if current_fb == "dislike" else ""
-                        st.markdown(f'<span style="font-family:Share Tech Mono,monospace;font-size:0.5rem;color:{conf_color};">confidence: {conf}%{fb_label}</span>', unsafe_allow_html=True)
+                        fb_label = " · liked ✓" if current_fb == "like" else " · not helpful" if current_fb == "dislike" else ""
+                        st.markdown(f'<span style="font-family:Share Tech Mono,monospace;font-size:0.5rem;color:{conf_color};">conf: {conf}%{fb_label}</span>', unsafe_allow_html=True)
 
     question = st.chat_input("Message PDF Bot…")
 
@@ -654,7 +706,7 @@ else:
         think_ph = st.empty()
         think_ph.markdown(THINKING_HTML, unsafe_allow_html=True)
 
-        # Retrieve + rerank
+        # Retrieve + rerank with cross-encoder
         q_emb = np.array([model.encode(question)]).astype('float32')
         _, idxs = st.session_state.index.search(q_emb, min(10, len(st.session_state.chunks)))
         candidate_chunks = [(int(i), st.session_state.chunks[int(i)]) for i in idxs[0]]
@@ -664,7 +716,6 @@ else:
         context   = "\n\n".join(ch for _, (_, ch) in ranked)
         top_scores = [s for s, _ in ranked]
 
-        # Compute confidence
         confidence_pct = ce_scores_to_pct(top_scores)
         st.session_state["last_retrieval_pct"] = confidence_pct
 
